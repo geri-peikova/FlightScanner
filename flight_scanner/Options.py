@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QPushButton, QVBoxLayout, QLineEdit, QTextEdit, QLabel, QFrame, QFormLayout, \
-    QMessageBox
+from PyQt5.QtWidgets import QWidget, QPushButton, QLineEdit, QLabel, QFormLayout, QMessageBox
+
+from FlightScanner import scanning
 
 
 class WeekdaySelector(QWidget):
@@ -52,9 +53,11 @@ class WeekdaySelector(QWidget):
             print("Flight from:", text_from)
             print("Flight to:", text_to)
 
+            print('\nYou will be travelling on: ')
             for day, button in zip(self.days_of_week, self.buttons_days_of_week):
                 if button.isChecked():
-                    print(day, "is marked.")
+                    print(' ', day)
+        scanning()
 
     def buttons_sequencing(self):
         sender = self.sender()
