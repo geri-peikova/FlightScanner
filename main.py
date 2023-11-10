@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication
 
 from FlightScanner import scanning
 from Options import WeekdaySelector
+from dummyD import dummyD
 
 if __name__ == '__main__':
     """
@@ -11,3 +12,4 @@ if __name__ == '__main__':
     window.show()
     sys.exit(app.exec_())"""
     scanning()
+    #dummyD()
