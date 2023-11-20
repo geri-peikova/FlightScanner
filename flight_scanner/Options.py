@@ -44,6 +44,8 @@ class WeekdaySelector(QWidget):
         self.setLayout(layout)
 
     def on_clickable_button_click(self):
+        vacation_week_days = {}
+        checked_days = []
         text_from = self.textline_from.text()
         text_to = self.textline_to.text()
 
@@ -56,8 +58,14 @@ class WeekdaySelector(QWidget):
             print('\nYou will be travelling on: ')
             for day, button in zip(self.days_of_week, self.buttons_days_of_week):
                 if button.isChecked():
+                    checked_days.append(day)
                     print(' ', day)
-        scanning()
+                    if 'start' not in vacation_week_days:
+                        vacation_week_days['start'] = day
+                        vacation_week_days['end'] = day
+
+
+        #scanning()
 
     def buttons_sequencing(self):
         sender = self.sender()
