@@ -1,4 +1,8 @@
+import calendar
 import sys
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
+
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QHBoxLayout, QPushButton, \
     QMessageBox
 
@@ -69,8 +73,10 @@ class MyWidget(QWidget):
         else:
             input_data['flight_from'] = self.from_textbox.text()
             input_data['flight_to'] = self.to_textbox.text()
+            print('\nFlight data: ', input_data)
+            dates_list = generate_dates(self.week_days_combobox1.currentText(), self.week_days_combobox2.currentText())
+            print(dates_list)
 
-            print('\nFlight data: %s', input_data)
         # scanning()
 
 
@@ -81,3 +87,32 @@ def info_box(title, text):
     info_box.setText(text)
     info_box.setStandardButtons(QMessageBox.Ok)
     info_box.exec()
+
+
+def generate_dates(start_day, end_day, num_months=2):
+    start_day = get_index_by_weekday_name(start_day)
+    end_day = get_index_by_weekday_name(end_day)
+    dates_list = []
+    today = datetime.now()
+
+    # Find the next Friday
+    current_day_of_week = today.weekday()
+    days_until_start_day = (start_day - current_day_of_week + 7) % 7
+    next_weekday = today + timedelta(days=days_until_start_day)
+
+    # Print all the dates starting from Friday and ending on Monday for the next two months
+    while next_weekday + timedelta(days=end_day) <= today + relativedelta(months=+2):  # Print for the next two months (8 weeks)
+        if start_day >= end_day:
+            week_set = {'End': (next_weekday + timedelta(days=end_day) - timedelta(start_day-7)).strftime('%d-%m-%Y')}
+        else:
+            week_set = {'End': (next_weekday + timedelta(days=end_day)).strftime('%d-%m-%Y')}
+        week_set['Start'] = next_weekday.strftime('%d-%m-%Y')
+        dates_list.append(week_set)
+        next_weekday += timedelta(days=7)
+    return dates_list
+
+
+def get_index_by_weekday_name(weekday):
+    for i, day in enumerate(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']):
+        if day == weekday:
+            return i
