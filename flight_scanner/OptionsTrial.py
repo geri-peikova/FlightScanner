@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QPushButton, QLineEdit, QLabel, QFormLayout, QMessageBox
 
-from FlightScanner import scanning
+from flight_scanner import scanning
 
 
 class WeekdaySelector(QWidget):

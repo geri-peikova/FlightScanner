@@ -5,10 +5,7 @@ from selenium.common import NoSuchElementException, StaleElementReferenceExcepti
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
-
-from dummyD import info_box
 
 
 def scanning():
@@ -17,7 +14,9 @@ def scanning():
         button_accept_all = find_my_element_by_xpath(driver, '/html/body/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/div[1]/form[2]/div/div/button')
         button_accept_all.click()
     finally:
-        search_flight('London', 'ewsfa', 'Fri, Mar 1', 'Sun, Mar 3', driver)
+        search_result = search_flight('Lqrwrqon', 'ewsfa', 'Fri, Mar 1', 'Sun, Mar 3', driver)
+        if search_result == 1:
+            return 1
         try:
             popup_close_button = driver.find_element(By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div[2]/div/div/div[1]/span/span/span[2]/div/div/div/div[3]')
             popup_close_button.click()
@@ -38,6 +37,7 @@ def scanning():
         time.sleep(2)
         add_flights(find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[4]/ul/li[3]'), flights, driver)
         print(flights)
+        return 0
 
 
 def driver_setup():
@@ -103,39 +103,34 @@ def find_my_element_by_xpath(driver, xpath):
 
 
 def search_flight(flight_from, flight_to, depart_date, return_date, driver):
-    if WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[1]/div/div/div[1]/div/div/input'))).get_attribute('value') != flight_from:
-        flight_from_input = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[1]/div/div/div[1]/div/div/input')
-        driver.execute_script("arguments[0].setAttribute('value',arguments[1])",flight_from_input, flight_from)
-        verify_destination(flight_from_input, flight_from, driver)
-
-    depart_date_input = find_my_element_by_xpath(driver,
-                                            '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[1]/div/input')
-    depart_date_input.send_keys(depart_date)
-    depart_date_input.send_keys(Keys.ENTER)
-
-    return_date_input = find_my_element_by_xpath(driver,
-                                            '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[2]/div/input')
-    return_date_input.send_keys(return_date)
-    return_date_input.send_keys(Keys.ENTER)
+    flight_from_input = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[1]/div/div/div[1]/div/div/input')
+    driver.execute_script("arguments[0].setAttribute('value',arguments[1])",flight_from_input, flight_from)
 
     flight_to_input = find_my_element_by_xpath(driver,
-                                              '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[4]/div/div/div[1]/div/div/input')
+                                               '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[4]/div/div/div[1]/div/div/input')
     flight_to_input.send_keys(flight_to)
     try:
-        flight_to_input = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]')))
+        flight_to_input = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,
+                                                                                            '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]')))
         flight_to_input.click()
     except:
         driver.quit()
-        info_box('Warning', 'The submitted information is incorrect. Fill the correct data.')
+        return 1
+    else:
+        depart_date_input = find_my_element_by_xpath(driver,
+                                                '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[1]/div/input')
+        depart_date_input.send_keys(depart_date)
+        depart_date_input.send_keys(Keys.ENTER)
 
-    search = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[2]/div/button')
-    search.click()
+        return_date_input = find_my_element_by_xpath(driver,
+                                                '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[2]/div/input')
+        return_date_input.send_keys(return_date)
+        return_date_input.send_keys(Keys.ENTER)
 
+        search = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[2]/div/button')
+        search.click()
+        return 0
 
-def verify_destination(destination, expected_text, driver):
-    if destination.get_attribute('value') != expected_text:
-        driver.quit()
-        info_box('Warning', 'The submitted information is incorrect. Fill the correct data.')
 
 """        list_sorted_flights = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[4]/ul')
         items = list_sorted_flights.find_elements(By.TAG_NAME, 'li')

@@ -4,8 +4,10 @@ from dateutil.relativedelta import relativedelta
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QHBoxLayout, QPushButton, \
     QMessageBox
 
+from flight_scanner import scanning
 
-class MyWidget(QWidget):
+
+class MyMenu(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -74,8 +76,9 @@ class MyWidget(QWidget):
             print('\nFlight data: ', input_data)
             dates_list = generate_dates(self.week_days_combobox1.currentText(), self.week_days_combobox2.currentText())
             print(dates_list)
-
-        # scanning()
+            scan_result = scanning()
+            if scan_result == 1:
+                info_box('Warning', 'The submitted information is incorrect. Fill the correct data.')
 
 
 def info_box(title, text):
