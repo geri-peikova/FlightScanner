@@ -1,49 +1,23 @@
 import time
 
 from selenium import webdriver
-from selenium.common import TimeoutException, NoSuchElementException, StaleElementReferenceException
+from selenium.common import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver import Keys
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
-#AIzaSyDwluc0SlxuEyjmn173yjSwlYe8Lcfe26o
+
+from dummyD import info_box
+
 
 def scanning():
-    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
-
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_experimental_option("useAutomationExtension", False)
-    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    #chrome_options.add_argument('--headless')  # to not see what is happening in chrome
-    chrome_options.add_argument(f"user-agent={user_agent}")
-    chrome_options.add_experimental_option("detach", True)
-    driver = webdriver.Chrome(options=chrome_options)
-
-    driver.maximize_window()
-    driver.get('https://www.google.com/travel/flights')
-
+    driver = driver_setup()
     try:
         button_accept_all = find_my_element_by_xpath(driver, '/html/body/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/div[1]/form[2]/div/div/button')
         button_accept_all.click()
     finally:
-
-        depart_input = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[1]/div/input')
-        depart_input.send_keys("1 March")
-        depart_input.send_keys(Keys.ENTER)
-
-        return_input = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[2]/div/input')
-        return_input.send_keys("2 March")
-        return_input.send_keys(Keys.ENTER)
-
-        destination = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[4]/div/div/div[1]/div/div/input')
-        destination.send_keys("Milano")
-        destination = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]')
-        destination.click()
-
-        search = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[2]/div/button')
-        search.click()
-
+        search_flight('London', 'ewsfa', 'Fri, Mar 1', 'Sun, Mar 3', driver)
         try:
             popup_close_button = driver.find_element(By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div[2]/div/div/div[1]/span/span/span[2]/div/div/div/div[3]')
             popup_close_button.click()
@@ -64,6 +38,22 @@ def scanning():
         time.sleep(2)
         add_flights(find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[4]/ul/li[3]'), flights, driver)
         print(flights)
+
+
+def driver_setup():
+    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    # chrome_options.add_argument('--headless')  # to not see what is happening in chrome
+    chrome_options.add_argument(f"user-agent={user_agent}")
+    chrome_options.add_experimental_option("detach", True)
+    driver = webdriver.Chrome(options=chrome_options)
+
+    driver.maximize_window()
+    driver.get('https://www.google.com/travel/flights')
+    return driver
 
 
 def add_flights(flight, flights, driver):
@@ -111,6 +101,41 @@ def find_my_element_by_xpath(driver, xpath):
         find_my_element_by_xpath(driver, xpath)
     return my_element
 
+
+def search_flight(flight_from, flight_to, depart_date, return_date, driver):
+    if WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[1]/div/div/div[1]/div/div/input'))).get_attribute('value') != flight_from:
+        flight_from_input = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[1]/div/div/div[1]/div/div/input')
+        driver.execute_script("arguments[0].setAttribute('value',arguments[1])",flight_from_input, flight_from)
+        verify_destination(flight_from_input, flight_from, driver)
+
+    depart_date_input = find_my_element_by_xpath(driver,
+                                            '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[1]/div/input')
+    depart_date_input.send_keys(depart_date)
+    depart_date_input.send_keys(Keys.ENTER)
+
+    return_date_input = find_my_element_by_xpath(driver,
+                                            '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[2]/div/input')
+    return_date_input.send_keys(return_date)
+    return_date_input.send_keys(Keys.ENTER)
+
+    flight_to_input = find_my_element_by_xpath(driver,
+                                              '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[4]/div/div/div[1]/div/div/input')
+    flight_to_input.send_keys(flight_to)
+    try:
+        flight_to_input = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]')))
+        flight_to_input.click()
+    except:
+        driver.quit()
+        info_box('Warning', 'The submitted information is incorrect. Fill the correct data.')
+
+    search = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[2]/div/button')
+    search.click()
+
+
+def verify_destination(destination, expected_text, driver):
+    if destination.get_attribute('value') != expected_text:
+        driver.quit()
+        info_box('Warning', 'The submitted information is incorrect. Fill the correct data.')
 
 """        list_sorted_flights = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[4]/ul')
         items = list_sorted_flights.find_elements(By.TAG_NAME, 'li')

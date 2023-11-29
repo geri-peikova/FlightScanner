@@ -1,9 +1,7 @@
-import calendar
-import sys
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QHBoxLayout, QPushButton, \
+from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QHBoxLayout, QPushButton, \
     QMessageBox
 
 
