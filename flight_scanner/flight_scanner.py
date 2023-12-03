@@ -5,6 +5,7 @@ from selenium.common import NoSuchElementException, StaleElementReferenceExcepti
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
 
@@ -14,7 +15,7 @@ def scanning():
         button_accept_all = find_my_element_by_xpath(driver, '/html/body/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/div[1]/form[2]/div/div/button')
         button_accept_all.click()
     finally:
-        search_result = search_flight('Lqrwrqon', 'ewsfa', 'Fri, Mar 1', 'Sun, Mar 3', driver)
+        search_result = search_flight('Varna', 'Sofia', 'Fri, Mar 1', 'Sun, Mar 3', driver)
         if search_result == 1:
             return 1
         try:
@@ -23,10 +24,7 @@ def scanning():
         except:
             print('Popup have not shown!')
 
-        sort_button = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[1]/div/button')
-        sort_button.click()
-        sort_by_price_button = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[2]/div/ul/li[2]')
-        sort_by_price_button.click()
+        sort_by_price(driver)
 
         flights = []
         time.sleep(1)
@@ -102,9 +100,23 @@ def find_my_element_by_xpath(driver, xpath):
     return my_element
 
 
+def sort_by_price(driver):
+    sort_button = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[1]/div/button')
+    sort_button.click()
+    sort_by_price_button = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[2]/div/ul/li[2]')
+    sort_by_price_button.click()
+
+
 def search_flight(flight_from, flight_to, depart_date, return_date, driver):
-    flight_from_input = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[1]/div/div/div[1]/div/div/input')
-    driver.execute_script("arguments[0].setAttribute('value',arguments[1])",flight_from_input, flight_from)
+    depart_date_input = find_my_element_by_xpath(driver,
+                                                 '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[1]/div/input')
+    depart_date_input.send_keys(depart_date)
+    depart_date_input.send_keys(Keys.ENTER)
+
+    return_date_input = find_my_element_by_xpath(driver,
+                                                 '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[2]/div/input')
+    return_date_input.send_keys(return_date)
+    return_date_input.send_keys(Keys.ENTER)
 
     flight_to_input = find_my_element_by_xpath(driver,
                                                '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[4]/div/div/div[1]/div/div/input')
@@ -116,20 +128,19 @@ def search_flight(flight_from, flight_to, depart_date, return_date, driver):
     except:
         driver.quit()
         return 1
-    else:
-        depart_date_input = find_my_element_by_xpath(driver,
-                                                '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[1]/div/input')
-        depart_date_input.send_keys(depart_date)
-        depart_date_input.send_keys(Keys.ENTER)
-
-        return_date_input = find_my_element_by_xpath(driver,
-                                                '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[2]/div/input')
-        return_date_input.send_keys(return_date)
-        return_date_input.send_keys(Keys.ENTER)
-
-        search = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[2]/div/button')
-        search.click()
-        return 0
+    flight_from_input = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[1]/div/div/div[1]/div/div/input')
+    flight_from_input.clear()
+    flight_from_input.send_keys(flight_from)
+    try:
+        flight_to_input = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,
+                                                                                            '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]')))
+        flight_to_input.click()
+    except:
+        driver.quit()
+        return 1
+    search = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[2]/div/button')
+    search.click()
+    return 0
 
 
 """        list_sorted_flights = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[4]/ul')
