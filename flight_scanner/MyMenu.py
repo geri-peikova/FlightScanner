@@ -74,9 +74,9 @@ class MyMenu(QWidget):
             input_data['flight_from'] = self.from_textbox.text()
             input_data['flight_to'] = self.to_textbox.text()
             print('\nFlight data: ', input_data)
-            dates_list = generate_dates(self.week_days_combobox1.currentText(), self.week_days_combobox2.currentText())
-            print(dates_list)
-            scan_result = scanning()
+            input_data['dates_list'] = generate_dates(self.week_days_combobox1.currentText(), self.week_days_combobox2.currentText())
+            print(input_data['dates_list'])
+            scan_result = scanning(input_data)
             if scan_result == 1:
                 info_box('Warning', 'The submitted information is incorrect. Fill the correct data.')
 
@@ -102,12 +102,12 @@ def generate_dates(start_day, end_day, num_months=2):
     next_weekday = today + timedelta(days=days_until_start_day)
 
     # Print all the dates starting from Friday and ending on Monday for the next two months
-    while next_weekday + timedelta(days=end_day) <= today + relativedelta(months=+2):  # Print for the next two months (8 weeks)
+    while next_weekday + timedelta(days=end_day) <= today + relativedelta(months=+num_months):  # Print for the next two months (8 weeks)
         if start_day >= end_day:
-            week_set = {'End': (next_weekday + timedelta(days=end_day) - timedelta(start_day-7)).strftime('%d-%m-%Y')}
+            week_set = {'End': (next_weekday + timedelta(days=end_day) - timedelta(start_day-7)).strftime('%a, %b %d')}
         else:
-            week_set = {'End': (next_weekday + timedelta(days=end_day)).strftime('%d-%m-%Y')}
-        week_set['Start'] = next_weekday.strftime('%d-%m-%Y')
+            week_set = {'End': (next_weekday + timedelta(days=end_day)).strftime('%a, %b %d')}
+        week_set['Start'] = next_weekday.strftime('%a, %b %d')
         dates_list.append(week_set)
         next_weekday += timedelta(days=7)
     return dates_list
