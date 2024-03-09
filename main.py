@@ -19,7 +19,7 @@ if __name__ == '__main__':
                   'arrival_weekday': 'Sunday',
                   'flight_from': 'Sofia',
                   'flight_to': 'Rome',
-                  'dates_list': [{'End': 'Tue, Jan 16', 'Start': 'Mon, Jan 15'},
-                                 {'End': 'Tue, Jan 23', 'Start': 'Mon, Jan 22'},
-                                 {'End': 'Tue, Jan 30', 'Start': 'Mon, Jan 29'}]}
+                  'dates_list': [{'End': 'Tue, Sep 3', 'Start': 'Mon, Sep 2'},
+                                 {'End': 'Tue, Sep 10', 'Start': 'Mon, Sep 9'},
+                                 {'End': 'Tue, Sep 17', 'Start': 'Mon, Sep 16'}]}
     scanning(input_data)

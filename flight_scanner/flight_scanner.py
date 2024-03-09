@@ -9,17 +9,18 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 
 def scanning(input_data):
-    driver = driver_setup()
     list_flights = []
-    try:
-        button_accept_all = find_my_element_by_xpath(driver, '/html/body/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/div[1]/form[2]/div/div/button')
-        button_accept_all.click()
-        time.sleep(1)
-    finally:
-        for i in range(0, len(input_data['dates_list'])):
-            adding_week_flights(input_data['flight_from'], input_data['flight_to'], input_data['dates_list'][i]['Start'], input_data['dates_list'][i]['End'], list_flights, driver)
-        print(list_flights)
-        return 0
+    for set_num in range(0, len(input_data['dates_list'])):
+        driver = driver_setup()
+        try:
+            button_accept_all = find_my_element_by_xpath(driver, '/html/body/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/div[1]/form[2]/div/div/button')
+            button_accept_all.click()
+            time.sleep(2)
+        finally:
+            adding_week_flights(input_data, set_num, list_flights, driver)
+            print(list_flights)
+            driver.quit()
+    return 0
 
 
 def driver_setup():
@@ -40,19 +41,19 @@ def driver_setup():
 
 def add_flights(flight, flights, driver):
     flight.click()
-    time.sleep(1)
+    time.sleep(2)
     flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/ul/li/div/div[2]')
     flight.click()
-    time.sleep(1)
+    time.sleep(2)
     try:
         departure_flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[2]/div[1]/div/div/div/div[1]/div[2]/div/div[1]/div/div[2]')
         arrival_flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[2]/div[1]/div/div/div/div[2]/div[2]/div/div[1]/div/div[2]')
         price = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[2]/div/div/div[2]/div/div[1]/span')
-        time.sleep(1)
+        time.sleep(2)
         flights.append(
             {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text,
              'link': driver.current_url})
-        time.sleep(1)
+        time.sleep(2)
         print('Flight: ',
               {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text,
                'link': driver.current_url})
@@ -62,14 +63,14 @@ def add_flights(flight, flights, driver):
         departure_flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[2]/div[1]/div/div/div/div[1]/div[2]/div/div[1]/div/div[2]')
         arrival_flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[2]/div[1]/div/div/div/div[2]/div[2]/div/div[1]/div/div[2]')
         price = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[2]/div/div/div[2]/div/div[1]/span')
-        time.sleep(1)
+        time.sleep(2)
         flights.append(
             {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text,
              'link': driver.current_url})
         print('Flight: ', {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text, 'link': driver.current_url})
 
     finally:
-        time.sleep(1)
+        time.sleep(2)
         driver.back()
         find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/ul')
         driver.back()
@@ -87,48 +88,48 @@ def find_my_element_by_xpath(driver, xpath):
 def sort_by_price(driver):
     sort_button = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[1]/div/button')))
     sort_button.click()
-    time.sleep(1)
+    time.sleep(2)
     sort_by_price_button = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[2]/div/ul/li[2]')
     sort_by_price_button.click()
-    time.sleep(1)
+    time.sleep(2)
 
 
-def search_flight(flight_from, flight_to, depart_date, return_date, driver):
+def search_flight(input_data, set_num, driver):   #  input_data['flight_from'], input_data['flight_to'], input_data['dates_list'][i]['Start'], input_data['dates_list'][i]['End']
     depart_date_input = find_my_element_by_xpath(driver,
                                                  '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[1]/div/input')
-    depart_date_input.send_keys(depart_date)
+    depart_date_input.send_keys(input_data['dates_list'][set_num]['Start'])
     depart_date_input.send_keys(Keys.ENTER)
-    time.sleep(1)
+    time.sleep(2)
     return_date_input = find_my_element_by_xpath(driver,
                                                  '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[2]/div/input')
-    return_date_input.send_keys(return_date)
+    return_date_input.send_keys(input_data['dates_list'][set_num]['End'])
     return_date_input.send_keys(Keys.ENTER)
-    time.sleep(1)
+    time.sleep(2)
     flight_to_input = find_my_element_by_xpath(driver,
                                                '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[4]/div/div/div[1]/div/div/input')
-    flight_to_input.send_keys(flight_to)
+    flight_to_input.send_keys(input_data['flight_to'])
     try:
         flight_to_input = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,
                                                                                             '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]')))
         flight_to_input.click()
-        time.sleep(1)
+        time.sleep(2)
     except:
         driver.quit()
         return 1
     flight_from_input = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[1]/div/div/div[1]/div/div/input')
     flight_from_input.clear()
-    flight_from_input.send_keys(flight_from)
+    flight_from_input.send_keys(input_data['flight_from'])
     try:
         flight_to_input = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,
                                                                                             '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]')))
         flight_to_input.click()
-        time.sleep(1)
+        time.sleep(2)
     except:
         driver.quit()
         return 1
     search = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[2]/div/button')
     search.click()
-    time.sleep(1)
+    time.sleep(2)
     return 0
 
 
@@ -147,19 +148,19 @@ def get_flights_xpath(driver):
     return list_flights
 
 
-def adding_week_flights(flight_from, flight_to, depart_date, return_date, list_flights, driver):
-    search_result = search_flight(flight_from, flight_to, depart_date, return_date, driver)
+def adding_week_flights(input_data, set_num, list_flights, driver):
+    search_result = search_flight(input_data, set_num, driver)
     if search_result == 1:
         return 1
     try:
         popup_close_button = driver.find_element(By.XPATH,
                                                  '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div[2]/div/div/div[1]/span/span/span[2]/div/div/div/div[3]')
         popup_close_button.click()
-        time.sleep(1)
+        time.sleep(2)
     except:
         print('Popup have not shown!')
     sort_by_price(driver)
-    time.sleep(1)
+    time.sleep(2)
     flights_xpaths = get_flights_xpath(driver)
     for flight_xpath in flights_xpaths:
         add_flights(find_my_element_by_xpath(driver, flight_xpath), list_flights, driver)
