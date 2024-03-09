@@ -94,7 +94,7 @@ def sort_by_price(driver):
     time.sleep(2)
 
 
-def search_flight(input_data, set_num, driver):   #  input_data['flight_from'], input_data['flight_to'], input_data['dates_list'][i]['Start'], input_data['dates_list'][i]['End']
+def search_flight(input_data, set_num, driver):
     depart_date_input = find_my_element_by_xpath(driver,
                                                  '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[1]/div/input')
     depart_date_input.send_keys(input_data['dates_list'][set_num]['Start'])
