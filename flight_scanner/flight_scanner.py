@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
+from Flight import Travel
 from interpreters import driver_setup, find_my_element_by_xpath, sort_flights_by_price, get_list_flights_xpaths
 
 
@@ -36,6 +37,11 @@ def add_flights(flight, list_flights, input_data, driver):
         arrival_flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[2]/div[1]/div/div/div/div[2]/div[2]/div/div[1]/div/div[2]')
         price = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[2]/div/div/div[2]/div/div[1]/span')
         time.sleep(2)
+
+        flight_info = {'price': price.text, 'departure_flight': departure_flight.text,
+                       'arrival_flight': arrival_flight.text,
+                       'link': driver.current_url}
+        list_flights.append(Travel(flight_info, input_data))
         list_flights.append(
             {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text,
              'link': driver.current_url})
@@ -50,6 +56,10 @@ def add_flights(flight, list_flights, input_data, driver):
         arrival_flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[2]/div[1]/div/div/div/div[2]/div[2]/div/div[1]/div/div[2]')
         price = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[2]/div/div/div[2]/div/div[1]/span')
         time.sleep(2)
+
+        flight_info = {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text,
+             'link': driver.current_url}
+        list_flights.append(Travel(flight_info, input_data))
         list_flights.append(
             {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text,
              'link': driver.current_url})
