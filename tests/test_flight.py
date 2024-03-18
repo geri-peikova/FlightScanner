@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 from Flight import get_departure, get_arrival, get_duration, get_departure_time, get_flight_date, convert_date_format, \
-    get_arrival_time
+    get_arrival_time, Travel, Flight
 
 FLIGHT_INFO_1 = {
     'price': 'BGN 176',
@@ -34,6 +34,37 @@ INPUT_DATA = {
     'dates_list': [{'End': 'Tue, Sep 3', 'Start': 'Mon, Sep 2'},
                    {'End': 'Tue, Sep 10', 'Start': 'Mon, Sep 9'},
                    {'End': 'Tue, Sep 17', 'Start': 'Mon, Sep 16'}]}
+
+
+def test_travel():
+    result = Travel(FLIGHT_INFO_1, INPUT_DATA)
+    assert result.link == 'https://www.google.com/travel/flights/booking?tfs=CBwQAhpKEgoy'
+    assert result.price == 'BGN 176'
+# arrival
+    assert result.arrival_flight.arrival == 'Rome, CIA'
+    assert result.arrival_flight.arrival_time == datetime(2024, 9, 3, 13, 20)
+    assert result.arrival_flight.company == 'company'
+    assert result.arrival_flight.departure == 'Sofia, CIA'
+    assert result.arrival_flight.departure_time == datetime(2024, 9, 3, 20, 35)
+    assert result.arrival_flight.duration == '1 hr'
+
+# departure
+    assert result.arrival_flight.arrival == 'Rome, SOF'
+    assert result.arrival_flight.arrival_time == datetime(2024, 9, 2, 14, 10)
+    assert result.arrival_flight.company == 'company'
+    assert result.arrival_flight.departure == 'Sofia, SOF'
+    assert result.arrival_flight.departure_time == datetime(2024, 9, 2, 13, 25)
+    assert result.arrival_flight.duration == '1 hr 45 min'
+
+
+def test_flight():
+    result = Flight(FLIGHT_INFO_1['arrival_flight'], INPUT_DATA)
+    assert result.arrival == 'Rome, CIA'
+    assert result.arrival_time == datetime(2024, 9, 3, 13, 20)
+    assert result.company == 'company'
+    assert result.departure == 'Sofia, CIA'
+    assert result.departure_time == datetime(2024, 9, 3, 20, 35)
+    assert result.duration == '1 hr'
 
 
 def test_get_departure():
