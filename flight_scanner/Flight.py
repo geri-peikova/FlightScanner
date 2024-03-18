@@ -1,4 +1,7 @@
 import re
+from datetime import datetime, timedelta
+
+from dateutil.relativedelta import relativedelta
 
 
 class Flight:
@@ -8,7 +11,7 @@ class Flight:
         self.company = 'company'      # TODO: Ryanair
         self.departure_time = 'departure_time'    # 'Mon, Sep 2, 1:25PM
         self.arrival_time = 'arrival_time'    # 'Mon, Sep 2, 2:10PM
-        self.duration = 'duration'    # 1 hr 45 min
+        self.duration = get_duration(flight_info)    # 1 hr 45 min
 
 
 class Travel:
@@ -31,6 +34,34 @@ def get_arrival(flight_info, input_data):
     return arrival
 
 
+def get_duration(flight_info):
+    duration = re.search(r'(\d+ hr( \d+ min)?)|((\d+ hr )?\d+ min)', flight_info).group()
+    return duration
+
+
+def get_flight_date(flight_info):
+    flight_date_string = re.search(r'(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d+', flight_info).group()    # "Mon, Sep 2"
+    flight_date_string = convert_date_format(flight_date_string)
+    flight_date = datetime.strptime(flight_date_string, '%a, %b %d')
+    current_year = datetime.now().year
+    while True:
+        current_date = datetime(current_year, flight_date.month, flight_date.day)
+        if current_date.strftime("%a, %b %d") == flight_date_string:
+            return current_date
+        current_year += 1
+
+
+def convert_date_format(flight_date):   # "Mon, Sep 2"
+    flight_date = flight_date.split(' ')
+    if len(flight_date[-1]) == 1:
+        flight_date[-1] = '0' + flight_date[-1]
+    flight_date = ' '.join(flight_date)
+    return flight_date
+
+
+def get_departure_time(flight_info):
+    duration = re.search(r'(\d+ hr( \d+ min)?)|((\d+ hr )?\d+ min)', flight_info).group()
+    return duration
 """ 
 FlightInfo:  {
             'price': 'BGN 176', 
