@@ -1,7 +1,8 @@
 from datetime import datetime
 
 import pytest
-from Flight import get_departure, get_arrival, get_duration, get_departure_time, get_flight_date, convert_date_format
+from Flight import get_departure, get_arrival, get_duration, get_departure_time, get_flight_date, convert_date_format, \
+    get_arrival_time
 
 FLIGHT_INFO_1 = {
     'price': 'BGN 176',
@@ -62,4 +63,9 @@ def test_convert_date_format():
 
 def test_get_departure_time():
     result = get_departure_time(FLIGHT_INFO_1['departure_flight'])
-    assert result == '45 min'
+    assert result == datetime(2024, 9, 2, 13, 25)
+
+
+def test_get_arrival_time():
+    result = get_arrival_time(FLIGHT_INFO_1['departure_flight'])
+    assert result == datetime(2024, 9, 2, 14, 10)

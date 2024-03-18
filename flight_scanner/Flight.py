@@ -9,8 +9,8 @@ class Flight:
         self.departure = get_departure(flight_info, input_data)  # Sofia, SOF
         self.arrival = get_arrival(flight_info, input_data)      # Rome, CIA
         self.company = 'company'      # TODO: Ryanair
-        self.departure_time = 'departure_time'    # 'Mon, Sep 2, 1:25PM
-        self.arrival_time = 'arrival_time'    # 'Mon, Sep 2, 2:10PM
+        self.departure_time = get_departure_time(flight_info)    # 'Mon, Sep 2, 1:25PM
+        self.arrival_time = get_arrival_time(flight_info)    # 'Mon, Sep 2, 2:10PM
         self.duration = get_duration(flight_info)    # 1 hr 45 min
 
 
@@ -60,8 +60,22 @@ def convert_date_format(flight_date):   # "Mon, Sep 2"
 
 
 def get_departure_time(flight_info):
-    duration = re.search(r'(\d+ hr( \d+ min)?)|((\d+ hr )?\d+ min)', flight_info).group()
-    return duration
+    departure_time = re.search(r'[\d+]:[\d\d](.*?)(PM|AM)', flight_info).group()
+    flight_date = get_flight_date(flight_info)
+    departure_time = datetime.strptime(departure_time, '%I:%M %p')
+    departure_time = flight_date.replace(hour=departure_time.hour, minute=departure_time.minute)
+    return departure_time
+
+
+def get_arrival_time(flight_info):
+    arrival_time = re.split(r'\n – \n', flight_info)[1]
+    arrival_time = re.search(r'[\d+]:[\d\d](.*?)(PM|AM)', arrival_time).group()
+    flight_date = get_flight_date(flight_info)
+    arrival_time = datetime.strptime(arrival_time, '%I:%M %p')
+    arrival_time = flight_date.replace(hour=arrival_time.hour, minute=arrival_time.minute)
+    return arrival_time
+
+
 """ 
 FlightInfo:  {
             'price': 'BGN 176', 
