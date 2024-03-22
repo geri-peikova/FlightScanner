@@ -1,7 +1,7 @@
 import time
 
 from selenium import webdriver
-from selenium.common import NoSuchElementException, StaleElementReferenceException
+from selenium.common import NoSuchElementException, StaleElementReferenceException, InvalidSelectorException
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -33,11 +33,20 @@ def add_flights(flight, list_flights, input_data, driver):
     flight.click()
     time.sleep(2)
     try:
-        departure_flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[2]/div[1]/div/div/div/div[1]/div[2]/div/div[1]/div/div[2]')
-        arrival_flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[2]/div[1]/div/div/div/div[2]/div[2]/div/div[1]/div/div[2]')
+        try:    # if 'Unfortunately, the price you saw on the previous page has changed' occurs
+            tip_changed_price = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[1]'))).text
+            if tip_changed_price == 'Unfortunately, the price you saw on the previous page has changed':
+                departure_flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[3]/div[1]/div/div/div/div[1]/div[2]/div/div[1]')
+                arrival_flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[3]/div[1]/div/div/div/div[2]/div[2]/div')
+            else:
+                raise InvalidSelectorException
+
+        except InvalidSelectorException:    # If normal
+            departure_flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[2]/div[1]/div/div/div/div[1]/div[2]/div/div[1]/div/div[2]')
+            arrival_flight = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[3]/div/div[2]/div[1]/div/div/div/div[2]/div[2]/div/div[1]/div/div[2]')
+
         price = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div/div[2]/div[2]/div[2]/div/div/div[2]/div/div[1]/span')
         time.sleep(2)
-
         flight_info = {'price': price.text, 'departure_flight': departure_flight.text,
                        'arrival_flight': arrival_flight.text,
                        'link': driver.current_url}
