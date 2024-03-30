@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 
-def driver_setup():
+def driver_setup(url):
     user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
 
     chrome_options = webdriver.ChromeOptions()
@@ -20,7 +20,7 @@ def driver_setup():
     driver = webdriver.Chrome(options=chrome_options)
 
     driver.maximize_window()
-    driver.get('https://www.google.com/travel/flights')
+    driver.get(url)
     return driver
 
 
@@ -43,7 +43,7 @@ def get_list_flights_xpaths(driver):
     for i in range(1, count_flights):
         list_flights.append('/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[4]/ul/li[' + str(i) + ']')
         print(list_flights[i-1])
-        if i == 3:
+        if i == 2:  # get 2 flights per date
             break
     return list_flights
 

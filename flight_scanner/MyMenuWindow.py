@@ -2,12 +2,14 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QHBoxLayout, QPushButton, \
-    QMessageBox
+    QMessageBox, QListWidget, QListWidgetItem
 
-from flight_scanner import scanning
+from flight_scanner import scanning, get_sorted_list_flights
+from interpreters import driver_setup
+from tests.setup import LIST_FLIGHTS_UNSORTED
 
 
-class MyMenu(QWidget):
+class MyMenuWindow(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -76,9 +78,14 @@ class MyMenu(QWidget):
             print('\nFlight data: ', input_data)
             input_data['dates_list'] = generate_dates(self.week_days_combobox1.currentText(), self.week_days_combobox2.currentText())
             print(input_data['dates_list'])
-            scan_result = scanning(input_data)
-            if scan_result == 1:
+#            scanned_result = scanning(input_data)    TODO: Remove the hashtag
+            scanned_result = get_sorted_list_flights(LIST_FLIGHTS_UNSORTED)  # TODO: this is testing line and you should remove it
+            if scanned_result == 1:
                 info_box('Warning', 'The submitted information is incorrect. Fill the correct data.')
+
+            self.scanned_flight_window = ScannedFlightsWindow(scanned_result, input_data)
+            self.scanned_flight_window.show()
+            self.hide()
 
 
 def info_box(title, text):
@@ -90,7 +97,7 @@ def info_box(title, text):
     info_box.exec()
 
 
-def generate_dates(start_day, end_day, num_months=2):
+def generate_dates(start_day, end_day, num_months=1):
     start_day = get_index_by_weekday_name(start_day)
     end_day = get_index_by_weekday_name(end_day)
     dates_list = []
@@ -117,3 +124,33 @@ def get_index_by_weekday_name(weekday):
     for i, day in enumerate(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']):
         if day == weekday:
             return i
+
+
+def open_link(url):
+    driver_setup(url)
+    # Here you can implement code to open the link in a web browser
+    print(f"Opening link: {url}")
+
+
+class ScannedFlightsWindow(QWidget):
+    def __init__(self, scanned_result, input_data):
+        super().__init__()
+
+        layout = QVBoxLayout()
+
+        self.flights_list_widget = QListWidget()
+
+        for flight in scanned_result:
+            flight_item = QListWidgetItem()
+            self.flights_list_widget.addItem(flight_item)
+            flight_button = QPushButton(f"Price: {flight.price}, Departure: {flight.departure_flight.departure_time}, Arrival: {flight.arrival_flight.arrival_time}")
+            flight_button.clicked.connect(lambda checked, url=flight.link: open_link(url))
+            self.flights_list_widget.setItemWidget(flight_item, flight_button)
+
+        layout.addWidget(QLabel(f"Round trip: {input_data['flight_from']} - {input_data['flight_to']}"))
+        layout.addWidget(self.flights_list_widget)
+
+        self.setLayout(layout)
+        self.setLayout(layout)
+        self.setGeometry(800, 400, 400, 200)
+        self.setWindowTitle('Flights List')

@@ -2,19 +2,21 @@ import sys
 from PyQt5.QtWidgets import QApplication
 
 from flight_scanner import scanning
-from MyMenu import MyMenu
+from MyMenuWindow import MyMenuWindow
 
 if __name__ == '__main__':
     """
     app = QApplication(sys.argv)
     window = WeekdaySelector()
     window.show()
-    sys.exit(app.exec_())
-
-    app = QApplication(sys.argv)
-    window = MyMenu()
     sys.exit(app.exec_())"""
 
+    app = QApplication(sys.argv)
+    window = MyMenuWindow()
+    window.show()
+    sys.exit(app.exec_())
+
+"""
     input_data = {'departure_weekday': 'Friday',
                   'arrival_weekday': 'Sunday',
                   'flight_from': 'Sofia',
@@ -23,3 +25,4 @@ if __name__ == '__main__':
                                  {'End': 'Tue, Sep 10', 'Start': 'Mon, Sep 9'},
                                  {'End': 'Tue, Sep 17', 'Start': 'Mon, Sep 16'}]}
     scanning(input_data)
+    """

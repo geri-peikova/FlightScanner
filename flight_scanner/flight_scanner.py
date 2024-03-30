@@ -14,7 +14,7 @@ from interpreters import driver_setup, find_my_element_by_xpath, sort_flights_by
 def scanning(input_data):
     list_flights = []
     for set_num in range(0, len(input_data['dates_list'])):
-        driver = driver_setup()
+        driver = driver_setup('https://www.google.com/travel/flights')
         try:
             button_accept_all = find_my_element_by_xpath(driver, '/html/body/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/div[1]/form[2]/div/div/button')
             button_accept_all.click()
@@ -22,7 +22,7 @@ def scanning(input_data):
         finally:
             adding_week_flights(input_data, set_num, list_flights, driver)
             driver.quit()
-    sorted_list_flights = sorted(list_flights, key=lambda flight: flight.price)
+    sorted_list_flights = get_sorted_list_flights(list_flights)
     return sorted_list_flights
 
 
@@ -135,6 +135,10 @@ def adding_week_flights(input_data, set_num, list_flights, driver):
     for flight_xpath in list_flights_xpaths:
         add_flights(find_my_element_by_xpath(driver, flight_xpath), list_flights, input_data, driver)
         time.sleep(3)
+
+
+def get_sorted_list_flights(list_flights):
+    return sorted(list_flights, key=lambda flight: flight.price)[:8]
 
 
 """  search_result = search_flight('Varna', 'Sofia', 'Fri, Mar 1', 'Sun, Mar 3', driver)

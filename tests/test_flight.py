@@ -4,6 +4,7 @@ from setup import INPUT_DATA, FLIGHTS_INFO, LIST_FLIGHTS_UNSORTED
 import pytest
 from Flight import get_departure, get_arrival, get_duration, get_departure_time, get_flight_date, convert_date_format, \
     get_arrival_time, Travel, Flight
+from flight_scanner import get_sorted_list_flights
 
 
 def test_travel():
@@ -81,3 +82,9 @@ def test_get_departure_time():
 def test_get_arrival_time():
     result = get_arrival_time(FLIGHTS_INFO[0]['arrival_flight'])
     assert result == datetime(2024, 9, 3, 23, 20)
+
+
+def test_get_sorted_list_flights():
+    result = get_sorted_list_flights(LIST_FLIGHTS_UNSORTED)
+    for i in range(1, len(result)):
+        assert result[i].price >= result[i-1].price
