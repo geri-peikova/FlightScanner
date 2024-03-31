@@ -2,8 +2,9 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QHBoxLayout, QPushButton, \
-    QMessageBox, QListWidget, QListWidgetItem
+    QMessageBox, QListWidget, QListWidgetItem, QGridLayout
 
+from date_utils import format_datetime_to_textdate_and_time
 from flight_scanner import scanning, get_sorted_list_flights
 from interpreters import driver_setup
 from tests.setup import LIST_FLIGHTS_UNSORTED
@@ -76,10 +77,12 @@ class MyMenuWindow(QWidget):
             input_data['flight_from'] = self.from_textbox.text()
             input_data['flight_to'] = self.to_textbox.text()
             print('\nFlight data: ', input_data)
-            input_data['dates_list'] = generate_dates(self.week_days_combobox1.currentText(), self.week_days_combobox2.currentText())
+            input_data['dates_list'] = generate_dates(self.week_days_combobox1.currentText(),
+                                                      self.week_days_combobox2.currentText())
             print(input_data['dates_list'])
-#            scanned_result = scanning(input_data)    TODO: Remove the hashtag
-            scanned_result = get_sorted_list_flights(LIST_FLIGHTS_UNSORTED)  # TODO: this is testing line and you should remove it
+            #            scanned_result = scanning(input_data)    TODO: Remove the hashtag
+            scanned_result = get_sorted_list_flights(
+                LIST_FLIGHTS_UNSORTED)  # TODO: this is testing line and you should remove it
             if scanned_result == 1:
                 info_box('Warning', 'The submitted information is incorrect. Fill the correct data.')
 
@@ -109,9 +112,11 @@ def generate_dates(start_day, end_day, num_months=1):
     next_weekday = today + timedelta(days=days_until_start_day)
 
     # Print all the dates starting from Friday and ending on Monday for the next two months
-    while next_weekday + timedelta(days=end_day) <= today + relativedelta(months=+num_months):  # Print for the next two months (8 weeks)
+    while next_weekday + timedelta(days=end_day) <= today + relativedelta(
+            months=+num_months):  # Print for the next two months (8 weeks)
         if start_day >= end_day:
-            week_set = {'End': (next_weekday + timedelta(days=end_day) - timedelta(start_day-7)).strftime('%a, %b %d')}
+            week_set = {
+                'End': (next_weekday + timedelta(days=end_day) - timedelta(start_day - 7)).strftime('%a, %b %d')}
         else:
             week_set = {'End': (next_weekday + timedelta(days=end_day)).strftime('%a, %b %d')}
         week_set['Start'] = next_weekday.strftime('%a, %b %d')
@@ -136,21 +141,51 @@ class ScannedFlightsWindow(QWidget):
     def __init__(self, scanned_result, input_data):
         super().__init__()
 
-        layout = QVBoxLayout()
-
-        self.flights_list_widget = QListWidget()
-
-        for flight in scanned_result:
-            flight_item = QListWidgetItem()
-            self.flights_list_widget.addItem(flight_item)
-            flight_button = QPushButton(f"Price: {flight.price}, Departure: {flight.departure_flight.departure_time}, Arrival: {flight.arrival_flight.arrival_time}")
-            flight_button.clicked.connect(lambda checked, url=flight.link: open_link(url))
-            self.flights_list_widget.setItemWidget(flight_item, flight_button)
-
-        layout.addWidget(QLabel(f"Round trip: {input_data['flight_from']} - {input_data['flight_to']}"))
-        layout.addWidget(self.flights_list_widget)
-
-        self.setLayout(layout)
+        layout = QGridLayout()
         self.setLayout(layout)
         self.setGeometry(800, 400, 400, 200)
         self.setWindowTitle('Flights List')
+
+        layout.addWidget(QLabel(f"Round trip: {input_data['flight_from']} - {input_data['flight_to']}"), 0, 0)
+
+        for i, flight in enumerate(scanned_result):
+            layout.addWidget(QLabel(f"| Price: {flight.price} |"), i + 1, 0)
+            layout.addWidget(QLabel(f"| Departure: {format_datetime_to_textdate_and_time(flight.departure_flight.departure_time)} |"), i + 1, 1)
+            layout.addWidget(QLabel(f"| Return: {format_datetime_to_textdate_and_time(flight.arrival_flight.arrival_time)} |"), i + 1, 2)
+            button = QPushButton("More Data")
+            button.setStyleSheet(
+                '''
+                QPushButton {
+                    background-color: #3498db;
+                    color: white;
+                    border-style: outset;
+                    border-width: 2px;
+                    border-radius: 10px;
+                    border-color: transparent;
+                    padding: 6px;
+                }
+                QPushButton:hover {
+                    background-color: #2980b9;
+                }
+                QPushButton:pressed {
+                    background-color: #2c3e50;
+                }
+                QPushButton:focus {
+                    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+                }
+                '''
+            )
+            layout.addWidget(button, i + 1, 3)
+            button.clicked.connect(lambda checked, url=flight.link: open_link(url))
+
+
+    """
+ layout.addWidget(self.flights_list_widget)
+ self.flights_list_widget = QListWidget()
+
+ for flight in scanned_result:
+     flight_item = QListWidgetItem()
+     self.flights_list_widget.addItem(flight_item)
+     flight_button = QPushButton(f"Price: {flight.price}, Departure: {flight.departure_flight.departure_time}, Arrival: {flight.arrival_flight.arrival_time}")
+     flight_button.clicked.connect(lambda checked, url=flight.link: open_link(url))
+     self.flights_list_widget.setItemWidget(flight_item, flight_button)"""

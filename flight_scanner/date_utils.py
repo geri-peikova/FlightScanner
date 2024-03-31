@@ -28,5 +28,9 @@ def get_calendar_dates():
         print()
 
 
+def format_datetime_to_textdate_and_time(dt):
+    return dt.strftime("%d %b %Y, %H:%Mh")
+
+
 if __name__ == '__main__':
     get_calendar_dates()
