@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
+
+from PyQt5.uic.properties import QtWidgets
 from dateutil.relativedelta import relativedelta
 
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QHBoxLayout, QPushButton, \
-    QMessageBox, QListWidget, QListWidgetItem, QGridLayout
+    QMessageBox, QListWidget, QListWidgetItem, QGridLayout, QGraphicsDropShadowEffect
 
 from date_utils import format_datetime_to_textdate_and_time
 from flight_scanner import scanning, get_sorted_list_flights
@@ -143,19 +145,36 @@ class ScannedFlightsWindow(QWidget):
 
         layout = QGridLayout()
         self.setLayout(layout)
+        self.setFixedSize(800, 300)
         self.setGeometry(800, 400, 400, 200)
         self.setWindowTitle('Flights List')
 
-        layout.addWidget(QLabel(f"Round trip: {input_data['flight_from']} - {input_data['flight_to']}"), 0, 0)
-
+        self.label_round_trip = QLabel(f"Round trip: {input_data['flight_from']} - {input_data['flight_to']}")
+        self.label_round_trip.setStyleSheet(
+            '''
+                    font-family: "Brush Script MT", "Lucida Console", serif;
+                    font-size: 20px;
+                    color: black;
+                
+            ''')
+        layout.addWidget(self.label_round_trip, 0, 0)
+        buttons = []
         for i, flight in enumerate(scanned_result):
-            layout.addWidget(QLabel(f"| Price: {flight.price} |"), i + 1, 0)
-            layout.addWidget(QLabel(f"| Departure: {format_datetime_to_textdate_and_time(flight.departure_flight.departure_time)} |"), i + 1, 1)
-            layout.addWidget(QLabel(f"| Return: {format_datetime_to_textdate_and_time(flight.arrival_flight.arrival_time)} |"), i + 1, 2)
+            label_price = QLabel(f"| Price: {flight.price} |")
+            label_price.setStyleSheet('background-color: rgba(173, 216, 230, 0.5); border: 1px solid rgba(0, 0, 255, 0.5); padding: 5px; border-radius: 5px;')
+            layout.addWidget(label_price, i + 1, 0)
+            label_departure = QLabel(f"| Departure: {format_datetime_to_textdate_and_time(flight.departure_flight.departure_time)} |")
+            label_departure.setStyleSheet('background-color: rgba(173, 216, 230, 0.5); border: 1px solid rgba(0, 0, 255, 0.5); padding: 5px; border-radius: 5px;')
+            layout.addWidget(label_departure, i + 1, 1)
+            label_return = QLabel(f"| Return: {format_datetime_to_textdate_and_time(flight.arrival_flight.arrival_time)} |")
+            label_return.setStyleSheet('background-color: rgba(173, 216, 230, 0.5); border: 1px solid rgba(0, 0, 255, 0.5); padding: 5px; border-radius: 5px;')
+            layout.addWidget(label_return, i + 1, 2)
             button = QPushButton("More Data")
             button.setStyleSheet(
                 '''
                 QPushButton {
+                    font-family: "Brush Script MT", "Lucida Console", serif;
+                    font-size: 15px;
                     background-color: #3498db;
                     color: white;
                     border-style: outset;
@@ -163,6 +182,7 @@ class ScannedFlightsWindow(QWidget):
                     border-radius: 10px;
                     border-color: transparent;
                     padding: 6px;
+                    box-shadow: 10px 10px 10px grey;
                 }
                 QPushButton:hover {
                     background-color: #2980b9;
@@ -170,22 +190,8 @@ class ScannedFlightsWindow(QWidget):
                 QPushButton:pressed {
                     background-color: #2c3e50;
                 }
-                QPushButton:focus {
-                    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
-                }
                 '''
             )
             layout.addWidget(button, i + 1, 3)
+            buttons.append(button)
             button.clicked.connect(lambda checked, url=flight.link: open_link(url))
-
-
-    """
- layout.addWidget(self.flights_list_widget)
- self.flights_list_widget = QListWidget()
-
- for flight in scanned_result:
-     flight_item = QListWidgetItem()
-     self.flights_list_widget.addItem(flight_item)
-     flight_button = QPushButton(f"Price: {flight.price}, Departure: {flight.departure_flight.departure_time}, Arrival: {flight.arrival_flight.arrival_time}")
-     flight_button.clicked.connect(lambda checked, url=flight.link: open_link(url))
-     self.flights_list_widget.setItemWidget(flight_item, flight_button)"""
