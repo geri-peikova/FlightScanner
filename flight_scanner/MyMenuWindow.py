@@ -1,14 +1,13 @@
-import time
-
-from PyQt5.QtGui import QPixmap, QMovie, QFont
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QHBoxLayout, QPushButton, \
     QMessageBox, QGridLayout
 from PyQt5 import QtCore
 
 from date_utils import format_datetime_to_textdate_and_time, generate_dates
-from flight_scanner import scanning, get_sorted_list_flights
+from flight_scanner import scanning
 from interpreters import driver_setup
 from tests.setup import LIST_FLIGHTS_UNSORTED
+from threads import LoadingThread
 
 
 class MyMenuWindow(QWidget):
@@ -49,6 +48,8 @@ class MyMenuWindow(QWidget):
         font.setPointSize(30)
         self.label_loading.setFont(font)
         self.label_loading.setAlignment(QtCore.Qt.AlignCenter)
+
+        self.loading_thread = None
 
         # Set up layout
         layout = QVBoxLayout()
@@ -96,42 +97,18 @@ class MyMenuWindow(QWidget):
             input_data['dates_list'] = generate_dates(self.week_days_combobox1.currentText(),
                                                       self.week_days_combobox2.currentText())
             print(input_data['dates_list'])
-            thread_loading(self.label_loading)
-            #            scanned_result = scanning(input_data)    TODO: Remove the hashtag
-            scanned_result = get_sorted_list_flights(
-                LIST_FLIGHTS_UNSORTED)  # TODO: this is testing line and you should remove it
+            self.loading_thread = LoadingThread(self, self.label_loading)
+            self.loading_thread.start()
+            scanned_result = scanning(input_data)   # TODO: Remove the hashtag
+            '''scanned_result = get_sorted_list_flights(
+                LIST_FLIGHTS_UNSORTED)  # TODO: this is testing line and you should remove it'''
+            self.loading_thread.stop()
             if scanned_result == 1:
                 info_box('Warning', 'The submitted information is incorrect. Fill the correct data.')
 
             self.scanned_flight_window = ScannedFlightsWindow(scanned_result, input_data)
             self.scanned_flight_window.show()
             self.hide()
-
-
-def thread_loading(label_loading):
-    while(True):
-        label_loading.setText("Loading")
-        label_loading.repaint()
-        time.sleep(1)
-        label_loading.setText("Loading.")
-        label_loading.repaint()
-        time.sleep(1)
-        label_loading.setText("Loading..")
-        label_loading.repaint()
-        time.sleep(1)
-        label_loading.setText("Loading...")
-        label_loading.repaint()
-        time.sleep(2)
-
-# Function for the second thread
-def thread_scanning():
-    for i in range(1, 11):
-        print("Thread 2:", i)
-        time.sleep(1)
-
-def start_loading(label_loading, widgets):
-    label_loading.show()
-    time.sleep(10)
 
 
 def info_box(title, text):
