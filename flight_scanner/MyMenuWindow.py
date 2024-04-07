@@ -1,8 +1,9 @@
 import time
 
-from PyQt5.QtGui import QPixmap, QMovie
+from PyQt5.QtGui import QPixmap, QMovie, QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QHBoxLayout, QPushButton, \
     QMessageBox, QGridLayout
+from PyQt5 import QtCore
 
 from date_utils import format_datetime_to_textdate_and_time, generate_dates
 from flight_scanner import scanning, get_sorted_list_flights
@@ -42,33 +43,41 @@ class MyMenuWindow(QWidget):
 
         self.button_look_for_flights = QPushButton("Look for flights")
 
+        self.label_loading = QLabel('')
+        font = QFont()
+        font.setFamily("Arial")
+        font.setPointSize(30)
+        self.label_loading.setFont(font)
+        self.label_loading.setAlignment(QtCore.Qt.AlignCenter)
+
         # Set up layout
         layout = QVBoxLayout()
-        day_layout = QHBoxLayout()
-        text_layout = QHBoxLayout()
+        layout1 = QHBoxLayout()
+        layout2 = QHBoxLayout()
+        layout3 = QGridLayout()
 
-        day_layout.addWidget(self.departure_weekday_label)
-        day_layout.addWidget(self.week_days_combobox1)
-        day_layout.addWidget(self.arrival_weekday_label)
-        day_layout.addWidget(self.week_days_combobox2)
+        layout1.addWidget(self.departure_weekday_label)
+        layout1.addWidget(self.week_days_combobox1)
+        layout1.addWidget(self.arrival_weekday_label)
+        layout1.addWidget(self.week_days_combobox2)
 
-        text_layout.addWidget(self.from_label)
-        text_layout.addWidget(self.from_textbox)
-        text_layout.addWidget(self.to_label)
-        text_layout.addWidget(self.to_textbox)
+        layout2.addWidget(self.from_label)
+        layout2.addWidget(self.from_textbox)
+        layout2.addWidget(self.to_label)
+        layout2.addWidget(self.to_textbox)
 
-        layout.addLayout(day_layout)
-        layout.addLayout(text_layout)
-        layout.addWidget(self.button_look_for_flights)
+        layout3.addWidget(self.button_look_for_flights, 0, 1)
+        layout3.addWidget(self.label_loading, 1, 1)
+
+        layout.addLayout(layout1)
+        layout.addLayout(layout2)
+        layout.addLayout(layout3)
 
         self.button_look_for_flights.clicked.connect(self.on_clickable_button_click)
 
-        self.label_loading = QLabel(self)
-        layout.addWidget(self.label_loading)
-
         self.setFixedSize(1500, 450)
         self.setGeometry(800, 400, 400, 200)
-        self.setWindowTitle('Day and Textbox Selector')
+        self.setWindowTitle('Flight Scanner')
         self.show()
 
         self.setLayout(layout)
@@ -81,17 +90,13 @@ class MyMenuWindow(QWidget):
             info_box('Information', 'Fill in all details before proceeding!')
 
         else:
-            widgets = [self.departure_weekday_label, self.week_days_combobox1, self.arrival_weekday_label,
-                       self.week_days_combobox2, self.from_textbox, self.to_textbox, self.button_look_for_flights,
-                       self.from_label, self.to_label]
-            start_loading(self.label_loading, widgets)
-            time.sleep(5)
             input_data['flight_from'] = self.from_textbox.text()
             input_data['flight_to'] = self.to_textbox.text()
             print('\nFlight data: ', input_data)
             input_data['dates_list'] = generate_dates(self.week_days_combobox1.currentText(),
                                                       self.week_days_combobox2.currentText())
             print(input_data['dates_list'])
+            thread_loading(self.label_loading)
             #            scanned_result = scanning(input_data)    TODO: Remove the hashtag
             scanned_result = get_sorted_list_flights(
                 LIST_FLIGHTS_UNSORTED)  # TODO: this is testing line and you should remove it
@@ -103,13 +108,30 @@ class MyMenuWindow(QWidget):
             self.hide()
 
 
+def thread_loading(label_loading):
+    while(True):
+        label_loading.setText("Loading")
+        label_loading.repaint()
+        time.sleep(1)
+        label_loading.setText("Loading.")
+        label_loading.repaint()
+        time.sleep(1)
+        label_loading.setText("Loading..")
+        label_loading.repaint()
+        time.sleep(1)
+        label_loading.setText("Loading...")
+        label_loading.repaint()
+        time.sleep(2)
+
+# Function for the second thread
+def thread_scanning():
+    for i in range(1, 11):
+        print("Thread 2:", i)
+        time.sleep(1)
+
 def start_loading(label_loading, widgets):
-    movie = QMovie("loading.gif")
-    label_loading.setMovie(movie)
-    movie.start()
     label_loading.show()
-    for widget in widgets:
-        widget.hide()
+    time.sleep(10)
 
 
 def info_box(title, text):
@@ -135,7 +157,7 @@ class ScannedFlightsWindow(QWidget):
         self.setLayout(layout)
         self.setFixedSize(1500, 450)
         self.setGeometry(800, 400, 400, 200)
-        self.setWindowTitle('Flights List')
+        self.setWindowTitle('Cheapest flights List')
         self.setStyleSheet('''background: #EBF9FE''')
 
         self.label_round_trip = QLabel(f"Round trip: {input_data['flight_from']} - {input_data['flight_to']}")
