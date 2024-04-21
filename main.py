@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 
 from flight_scanner import scanning
-from MyMenuWindow import MyMenuWindow
+from windows import MyMenuWindow
 
 if __name__ == '__main__':
     """

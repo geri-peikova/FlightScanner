@@ -1,12 +1,12 @@
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QHBoxLayout, QPushButton, \
+from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QPushButton, \
     QMessageBox, QGridLayout, QApplication, QFrame
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 
 from date_utils import format_datetime_to_textdate_and_time, generate_dates
 from flight_scanner import scanning
-from interpreters import driver_setup
+from interpreters import open_link
 from tests.setup import LIST_FLIGHTS_UNSORTED
 from threads import LoadingThread
 
@@ -18,7 +18,8 @@ class MyMenuWindow(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        screen_size = QApplication.primaryScreen().size()
+        # Create Menu Window
+        screen_size = QApplication.primaryScreen().size()  # TODO: Remove if you are not using
         font_size = 30 # 14
         self.setFixedSize(1920, 1080)
         self.setWindowTitle('Flight Scanner')
@@ -26,7 +27,7 @@ class MyMenuWindow(QWidget):
         self.setStyleSheet('''background: #e9f6fc''')
         self.show()
 
-        # Create dropdown menus for days of the week
+        # Create departure data
         self.departure_weekday_label = QLabel('Select Departure Day:')
         self.departure_weekday_label.setFont(QFont('Arial', font_size))
         self.departure_weekday_label.setStyleSheet(
@@ -37,6 +38,7 @@ class MyMenuWindow(QWidget):
             ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
         self.week_days_combobox1.setPlaceholderText('Week Days')
 
+        # Create arrival data
         self.arrival_weekday_label = QLabel('Select Arrival Day:')
         self.arrival_weekday_label.setFont(QFont('Arial', font_size))
         self.arrival_weekday_label.setStyleSheet(
@@ -47,7 +49,7 @@ class MyMenuWindow(QWidget):
             ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
         self.week_days_combobox2.setPlaceholderText('Week Days')
 
-        # Create textboxes with default and hint text
+        # Create From textboxes with default and hint text
         self.from_label = QLabel('From:')
         self.from_label.setFont(QFont('Arial', font_size))
         self.from_label.setAlignment(QtCore.Qt.AlignRight)
@@ -59,6 +61,7 @@ class MyMenuWindow(QWidget):
         self.from_textbox.setStyleSheet(
             'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
 
+        # Create To textboxes with default and hint text
         self.to_label = QLabel('To:')
         self.to_label.setFont(QFont('Arial', font_size))
         self.to_label.setAlignment(QtCore.Qt.AlignRight)
@@ -70,6 +73,7 @@ class MyMenuWindow(QWidget):
         self.to_textbox.setStyleSheet(
             'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
 
+        # Create button for scanning flights
         self.button_look_for_flights = QPushButton("Look for flights")
         self.button_look_for_flights.setFont(QFont('Arial', font_size))
         self.button_look_for_flights.setStyleSheet(
@@ -86,17 +90,20 @@ class MyMenuWindow(QWidget):
                 background-color: #1d95c9;
             }''')
 
+        # Create Loading label
         self.label_loading = QLabel('')
         self.label_loading.setFont(QFont('Arial', font_size*2))
         self.label_loading.setAlignment(QtCore.Qt.AlignCenter)
 
+        # Create thread
         self.loading_thread = None
 
-        # Set up layout
+        # Create layouts
         main_layout = QVBoxLayout()
         layout1 = QGridLayout()
         layout2 = QGridLayout()
 
+        # Add widgets to first layoult
         layout1.addWidget(self.departure_weekday_label, 0, 1)
         layout1.addWidget(self.week_days_combobox1, 0, 2)
         layout1.addWidget(self.arrival_weekday_label, 0, 3)
@@ -107,14 +114,18 @@ class MyMenuWindow(QWidget):
         layout1.addWidget(self.to_label, 1, 3)
         layout1.addWidget(self.to_textbox, 1, 4)
 
+        # Add widgets to second layoult
         layout2.addWidget(self.button_look_for_flights, 0, 1)
         layout2.addWidget(self.label_loading, 1, 1)
 
+        # Add layouts to main layout
         main_layout.addLayout(layout1)
         main_layout.addLayout(layout2)
 
+        # Add event for clicked button
         self.button_look_for_flights.clicked.connect(self.on_clickable_button_click)
 
+        # Set up layout
         self.setLayout(main_layout)
 
     def on_clickable_button_click(self):
@@ -145,44 +156,39 @@ class MyMenuWindow(QWidget):
             self.hide()
 
 
-def info_box(title, text):
-    info_box = QMessageBox()
-    info_box.setIcon(QMessageBox.Information)
-    info_box.setWindowTitle(title)
-    info_box.setText(text)
-    info_box.setStandardButtons(QMessageBox.Ok)
-    info_box.exec()
-
-
-def open_link(url):
-    driver_setup(url)
-    # Here you can implement code to open the link in a web browser
-    print(f"Opening link: {url}")
-
-
 class ScannedFlightsWindow(QWidget):
     def __init__(self, scanned_result, input_data):
         super().__init__()
 
+        self.init_ui(scanned_result, input_data)
+
+    def init_ui(self, scanned_result, input_data):
+
+        # Create Menu Window
         screen_size = QApplication.primaryScreen().size()
         font_size = 14  # 4
         self.setFixedSize(1920, 1080)
         self.setWindowTitle('Cheapest flights List')
         self.setWindowIcon(QtGui.QIcon('flight_scanner_logo.png')) # TODO: Fix why it is not showing the icon
         self.setStyleSheet('''background: #e9f6fc''')
+        self.show()
 
-        main_layout = QVBoxLayout()
-        layout1 = QGridLayout()
-        layout2 = QGridLayout()
-
+        # Create Label for Round Trip
         self.label_round_trip = QLabel(f"Round trip: {input_data['flight_from']} - {input_data['flight_to']}")
         self.label_round_trip.setFont(QFont('Brush Script MT', font_size*2))
         self.label_round_trip.setAlignment(QtCore.Qt.AlignCenter)
         self.label_round_trip.setFrameStyle(QFrame.Panel | QFrame.Raised)
         self.label_round_trip.setStyleSheet("QFrame { border-radius: 10px; border: 2px solid #29AAE1; }")
 
+        # Create layouts
+        main_layout = QVBoxLayout()
+        layout1 = QGridLayout()
+        layout2 = QGridLayout()
+
+        # Create flights data
         buttons = []
         for i, flight in enumerate(scanned_result):
+            # Create labels with flight data
             label_price = QLabel(f"{i+1} | Price: {flight.price} |")
             label_price.setFont(QFont('Brush Script MT', font_size * 2))
             label_price.setStyleSheet(
@@ -200,6 +206,8 @@ class ScannedFlightsWindow(QWidget):
             label_return.setStyleSheet(
                 'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
             layout2.addWidget(label_return, i + 1, 2)
+
+            # Create buttons with link for flight
             button = QPushButton("More Data")
             button.setFont(QFont('Brush Script MT', font_size * 2))
             button.setStyleSheet(
@@ -226,11 +234,23 @@ class ScannedFlightsWindow(QWidget):
             buttons.append(button)
             button.clicked.connect(lambda checked, url=flight.link: open_link(url))
 
+        # Add widgets to layout1
         layout1.addWidget(QWidget(), 1, 1)
         layout1.addWidget(self.label_round_trip, 2, 2)
         layout1.addWidget(QWidget(), 3, 3)
 
+        # Add layouts to main layout
         main_layout.addLayout(layout1)
         main_layout.addLayout(layout2)
 
+        # Set up layout
         self.setLayout(main_layout)
+
+
+def info_box(title, text):
+    info_box = QMessageBox()
+    info_box.setIcon(QMessageBox.Information)
+    info_box.setWindowTitle(title)
+    info_box.setText(text)
+    info_box.setStandardButtons(QMessageBox.Ok)
+    info_box.exec()

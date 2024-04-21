@@ -55,3 +55,8 @@ def sort_flights_by_price(driver):
     sort_by_price_button = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[2]/div/ul/li[2]')
     sort_by_price_button.click()
     time.sleep(2)
+
+
+def open_link(url):
+    driver_setup(url)
+    print(f"Opening link: {url}")

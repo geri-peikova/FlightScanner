@@ -2,7 +2,7 @@ import sys
 
 from PyQt5.QtWidgets import QApplication
 
-from MyMenuWindow import ScannedFlightsWindow
+from windows import ScannedFlightsWindow
 from flight_scanner import get_sorted_list_flights
 from tests.setup import LIST_FLIGHTS_UNSORTED, INPUT_DATA
 
