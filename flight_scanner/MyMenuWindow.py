@@ -1,7 +1,8 @@
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QHBoxLayout, QPushButton, \
-    QMessageBox, QGridLayout, QApplication
+    QMessageBox, QGridLayout, QApplication, QFrame
 from PyQt5 import QtCore
+from PyQt5 import QtGui
 
 from date_utils import format_datetime_to_textdate_and_time, generate_dates
 from flight_scanner import scanning
@@ -18,14 +19,18 @@ class MyMenuWindow(QWidget):
 
     def init_ui(self):
         screen_size = QApplication.primaryScreen().size()
-        font_size = int(screen_size.height()/150)
-        self.setFixedSize(int(screen_size.width() / 2), int(screen_size.height() / 2))
+        font_size = 30 # 14
+        self.setFixedSize(1920, 1080)
         self.setWindowTitle('Flight Scanner')
+        self.setWindowIcon(QtGui.QIcon('flight_scanner_logo.png'))
+        self.setStyleSheet('''background: #e9f6fc''')
         self.show()
 
         # Create dropdown menus for days of the week
         self.departure_weekday_label = QLabel('Select Departure Day:')
         self.departure_weekday_label.setFont(QFont('Arial', font_size))
+        self.departure_weekday_label.setStyleSheet(
+            'background-color: #bce4f5; padding: 5px; border-radius: 5px;')
         self.week_days_combobox1 = QComboBox(self)
         self.week_days_combobox1.setFont(QFont('Arial', font_size))
         self.week_days_combobox1.addItems(
@@ -34,6 +39,8 @@ class MyMenuWindow(QWidget):
 
         self.arrival_weekday_label = QLabel('Select Arrival Day:')
         self.arrival_weekday_label.setFont(QFont('Arial', font_size))
+        self.arrival_weekday_label.setStyleSheet(
+            'background-color: #bce4f5; padding: 5px; border-radius: 5px;')
         self.week_days_combobox2 = QComboBox(self)
         self.week_days_combobox2.setFont(QFont('Arial', font_size))
         self.week_days_combobox2.addItems(
@@ -43,18 +50,41 @@ class MyMenuWindow(QWidget):
         # Create textboxes with default and hint text
         self.from_label = QLabel('From:')
         self.from_label.setFont(QFont('Arial', font_size))
+        self.from_label.setAlignment(QtCore.Qt.AlignRight)
+        self.from_label.setStyleSheet(
+            'background-color: #bce4f5; padding: 5px; border-radius: 5px;')
         self.from_textbox = QLineEdit('Sofia', self)
         self.from_textbox.setFont(QFont('Arial', font_size))
         self.from_textbox.setPlaceholderText('From where?')
+        self.from_textbox.setStyleSheet(
+            'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
 
         self.to_label = QLabel('To:')
         self.to_label.setFont(QFont('Arial', font_size))
+        self.to_label.setAlignment(QtCore.Qt.AlignRight)
+        self.to_label.setStyleSheet(
+            'background-color: #bce4f5; padding: 5px; border-radius: 5px;')
         self.to_textbox = QLineEdit(self)
         self.to_textbox.setFont(QFont('Arial', font_size))
         self.to_textbox.setPlaceholderText('Where to?')
+        self.to_textbox.setStyleSheet(
+            'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
 
         self.button_look_for_flights = QPushButton("Look for flights")
         self.button_look_for_flights.setFont(QFont('Arial', font_size))
+        self.button_look_for_flights.setStyleSheet(
+            '''QPushButton {
+                background-color: #29AAE1;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px 20px;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            }
+
+            QPushButton:hover {
+                background-color: #1d95c9;
+            }''')
 
         self.label_loading = QLabel('')
         self.label_loading.setFont(QFont('Arial', font_size*2))
@@ -63,31 +93,29 @@ class MyMenuWindow(QWidget):
         self.loading_thread = None
 
         # Set up layout
-        layout = QVBoxLayout()
-        layout1 = QHBoxLayout()
-        layout2 = QHBoxLayout()
-        layout3 = QGridLayout()
+        main_layout = QVBoxLayout()
+        layout1 = QGridLayout()
+        layout2 = QGridLayout()
 
-        layout1.addWidget(self.departure_weekday_label)
-        layout1.addWidget(self.week_days_combobox1)
-        layout1.addWidget(self.arrival_weekday_label)
-        layout1.addWidget(self.week_days_combobox2)
+        layout1.addWidget(self.departure_weekday_label, 0, 1)
+        layout1.addWidget(self.week_days_combobox1, 0, 2)
+        layout1.addWidget(self.arrival_weekday_label, 0, 3)
+        layout1.addWidget(self.week_days_combobox2, 0, 4)
 
-        layout2.addWidget(self.from_label)
-        layout2.addWidget(self.from_textbox)
-        layout2.addWidget(self.to_label)
-        layout2.addWidget(self.to_textbox)
+        layout1.addWidget(self.from_label, 1, 1)
+        layout1.addWidget(self.from_textbox, 1, 2)
+        layout1.addWidget(self.to_label, 1, 3)
+        layout1.addWidget(self.to_textbox, 1, 4)
 
-        layout3.addWidget(self.button_look_for_flights, 0, 1)
-        layout3.addWidget(self.label_loading, 1, 1)
+        layout2.addWidget(self.button_look_for_flights, 0, 1)
+        layout2.addWidget(self.label_loading, 1, 1)
 
-        layout.addLayout(layout1)
-        layout.addLayout(layout2)
-        layout.addLayout(layout3)
+        main_layout.addLayout(layout1)
+        main_layout.addLayout(layout2)
 
         self.button_look_for_flights.clicked.connect(self.on_clickable_button_click)
 
-        self.setLayout(layout)
+        self.setLayout(main_layout)
 
     def on_clickable_button_click(self):
         input_data = {'departure_weekday': self.week_days_combobox1.currentText(),
@@ -137,42 +165,47 @@ class ScannedFlightsWindow(QWidget):
         super().__init__()
 
         screen_size = QApplication.primaryScreen().size()
-        font_size = int(screen_size.height() / 500)
-        self.setFixedSize(int(screen_size.width() / 2), int(screen_size.height() / 2))
-
-        layout = QGridLayout()
-        self.setLayout(layout)
+        font_size = 14  # 4
+        self.setFixedSize(1920, 1080)
         self.setWindowTitle('Cheapest flights List')
-        self.setStyleSheet('''background: #EBF9FE''')
+        self.setWindowIcon(QtGui.QIcon('flight_scanner_logo.png')) # TODO: Fix why it is not showing the icon
+        self.setStyleSheet('''background: #e9f6fc''')
+
+        main_layout = QVBoxLayout()
+        layout1 = QGridLayout()
+        layout2 = QGridLayout()
 
         self.label_round_trip = QLabel(f"Round trip: {input_data['flight_from']} - {input_data['flight_to']}")
-        self.label_round_trip.setFont(QFont('Brush Script MT', font_size * 2))
-        layout.addWidget(self.label_round_trip, 0, 0)
+        self.label_round_trip.setFont(QFont('Brush Script MT', font_size*2))
+        self.label_round_trip.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_round_trip.setFrameStyle(QFrame.Panel | QFrame.Raised)
+        self.label_round_trip.setStyleSheet("QFrame { border-radius: 10px; border: 2px solid #29AAE1; }")
+
         buttons = []
         for i, flight in enumerate(scanned_result):
-            label_price = QLabel(f"| Price: {flight.price} |")
+            label_price = QLabel(f"{i+1} | Price: {flight.price} |")
             label_price.setFont(QFont('Brush Script MT', font_size * 2))
             label_price.setStyleSheet(
-                'background-color: rgba(173, 216, 230, 0.5); border: 1px solid rgba(0, 0, 255, 0.5); padding: 5px; border-radius: 5px;')
-            layout.addWidget(label_price, i + 1, 0)
+                'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
+            layout2.addWidget(label_price, i + 1, 0)
             label_departure = QLabel(
                 f"| Departure: {format_datetime_to_textdate_and_time(flight.departure_flight.departure_time)} |")
             label_departure.setFont(QFont('Brush Script MT', font_size * 2))
             label_departure.setStyleSheet(
-                'background-color: rgba(173, 216, 230, 0.5); border: 1px solid rgba(0, 0, 255, 0.5); padding: 5px; border-radius: 5px;')
-            layout.addWidget(label_departure, i + 1, 1)
+                'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
+            layout2.addWidget(label_departure, i + 1, 1)
             label_return = QLabel(
                 f"| Return: {format_datetime_to_textdate_and_time(flight.arrival_flight.arrival_time)} |")
             label_return.setFont(QFont('Brush Script MT', font_size * 2))
             label_return.setStyleSheet(
-                'background-color: rgba(173, 216, 230, 0.5); border: 1px solid rgba(0, 0, 255, 0.5); padding: 5px; border-radius: 5px;')
-            layout.addWidget(label_return, i + 1, 2)
+                'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
+            layout2.addWidget(label_return, i + 1, 2)
             button = QPushButton("More Data")
             button.setFont(QFont('Brush Script MT', font_size * 2))
             button.setStyleSheet(
                 '''
                 QPushButton {
-                    background-color: #3498db;
+                    background-color: #29AAE1;
                     color: white;
                     border-style: outset;
                     border-width: 2px;
@@ -182,13 +215,22 @@ class ScannedFlightsWindow(QWidget):
                     box-shadow: 10px 10px 10px grey;
                 }
                 QPushButton:hover {
-                    background-color: #2980b9;
+                    background-color: #1d95c9;
                 }
                 QPushButton:pressed {
                     background-color: #2c3e50;
                 }
                 '''
             )
-            layout.addWidget(button, i + 1, 3)
+            layout2.addWidget(button, i + 1, 3)
             buttons.append(button)
             button.clicked.connect(lambda checked, url=flight.link: open_link(url))
+
+        layout1.addWidget(QWidget(), 1, 1)
+        layout1.addWidget(self.label_round_trip, 2, 2)
+        layout1.addWidget(QWidget(), 3, 3)
+
+        main_layout.addLayout(layout1)
+        main_layout.addLayout(layout2)
+
+        self.setLayout(main_layout)
