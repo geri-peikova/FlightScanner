@@ -1,26 +1,33 @@
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QPushButton, \
-    QMessageBox, QGridLayout, QApplication, QFrame
+    QMessageBox, QGridLayout, QFrame
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 
-from date_utils import format_datetime_to_textdate_and_time, generate_dates
+from date_utils import format_datetime_to_textdate_and_time, get_travel_dates
 from flight_scanner import scanning
 from interpreters import open_link
-from tests.setup import LIST_FLIGHTS_UNSORTED
 from threads import LoadingThread
 
 
 class MyMenuWindow(QWidget):
+    """
+    A window that allows users to select departure and arrival days,
+    and search for flights.
+    """
     def __init__(self):
+        """
+        Initializes the MyMenuWindow.
+        """
         super().__init__()
 
         self.init_ui()
 
     def init_ui(self):
-        # Create Menu Window
-        screen_size = QApplication.primaryScreen().size()  # TODO: Remove if you are not using
-        font_size = 30 # 14
+        """
+        Sets up the user interface elements of the window.
+        """
+        font_size = 30  # 14 TODO: Change to 14 for the laptop scale
         self.setFixedSize(1920, 1080)
         self.setWindowTitle('Flight Scanner')
         self.setWindowIcon(QtGui.QIcon('flight_scanner_logo.png'))
@@ -35,7 +42,8 @@ class MyMenuWindow(QWidget):
         self.week_days_combobox1 = QComboBox(self)
         self.week_days_combobox1.setFont(QFont('Arial', font_size))
         self.week_days_combobox1.addItems(
-            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
+             'Saturday', 'Sunday'])
         self.week_days_combobox1.setPlaceholderText('Week Days')
 
         # Create arrival data
@@ -46,7 +54,8 @@ class MyMenuWindow(QWidget):
         self.week_days_combobox2 = QComboBox(self)
         self.week_days_combobox2.setFont(QFont('Arial', font_size))
         self.week_days_combobox2.addItems(
-            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
+             'Saturday', 'Sunday'])
         self.week_days_combobox2.setPlaceholderText('Week Days')
 
         # Create From textboxes with default and hint text
@@ -59,7 +68,8 @@ class MyMenuWindow(QWidget):
         self.from_textbox.setFont(QFont('Arial', font_size))
         self.from_textbox.setPlaceholderText('From where?')
         self.from_textbox.setStyleSheet(
-            'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
+            'background-color: #bce4f5; border: 1px solid #29AAE1; '
+            'padding: 5px; border-radius: 5px;')
 
         # Create To textboxes with default and hint text
         self.to_label = QLabel('To:')
@@ -71,7 +81,8 @@ class MyMenuWindow(QWidget):
         self.to_textbox.setFont(QFont('Arial', font_size))
         self.to_textbox.setPlaceholderText('Where to?')
         self.to_textbox.setStyleSheet(
-            'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
+            'background-color: #bce4f5; border: 1px solid #29AAE1; '
+            'padding: 5px; border-radius: 5px;')
 
         # Create button for scanning flights
         self.button_look_for_flights = QPushButton("Look for flights")
@@ -92,7 +103,7 @@ class MyMenuWindow(QWidget):
 
         # Create Loading label
         self.label_loading = QLabel('')
-        self.label_loading.setFont(QFont('Arial', font_size*2))
+        self.label_loading.setFont(QFont('Arial', font_size * 2))
         self.label_loading.setAlignment(QtCore.Qt.AlignCenter)
 
         # Create thread
@@ -123,62 +134,90 @@ class MyMenuWindow(QWidget):
         main_layout.addLayout(layout2)
 
         # Add event for clicked button
-        self.button_look_for_flights.clicked.connect(self.on_clickable_button_click)
+        (self.button_look_for_flights.clicked
+         .connect(self.on_click_look_for_flights_button))
 
         # Set up layout
         self.setLayout(main_layout)
 
-    def on_clickable_button_click(self):
-        input_data = {'departure_weekday': self.week_days_combobox1.currentText(),
+    def on_click_look_for_flights_button(self):
+        """
+        Handles the click event for the 'Look for flights' button.
+        """
+        input_data = {'departure_weekday': self.week_days_combobox1
+        .currentText(),
                       'arrival_weekday': self.week_days_combobox2.currentText()}
 
-        if (not bool(self.from_textbox.text())) or (not bool(self.to_textbox.text())):
-            info_box('Information', 'Fill in all details before proceeding!')
+        if (not bool(self.from_textbox.text())) or (not bool(self.to_textbox
+                                                                     .text())):
+            popup_info_box('Information', 'Fill in all details '
+                                    'before proceeding!')
 
         else:
             input_data['flight_from'] = self.from_textbox.text()
             input_data['flight_to'] = self.to_textbox.text()
             print('\nFlight data: ', input_data)
-            input_data['dates_list'] = generate_dates(self.week_days_combobox1.currentText(),
-                                                      self.week_days_combobox2.currentText())
+            input_data['dates_list'] = get_travel_dates(self.week_days_combobox1
+                                                        .currentText(),
+                                                        self.week_days_combobox2
+                                                        .currentText())
             print(input_data['dates_list'])
             self.loading_thread = LoadingThread(self, self.label_loading)
             self.loading_thread.start()
-            scanned_result = scanning(input_data)   # TODO: Remove the hashtag
+            scanned_result = scanning(input_data)  # TODO: Remove the hashtag
             '''scanned_result = get_sorted_list_flights(
-                LIST_FLIGHTS_UNSORTED)  # TODO: this is testing line and you should remove it'''
+                LIST_FLIGHTS_UNSORTED)  # TODO: this is testing line and 
+                you should remove it'''
             self.loading_thread.stop()
             if scanned_result == 1:
-                info_box('Warning', 'The submitted information is incorrect. Fill the correct data.')
+                popup_info_box('Warning', 'The submitted information is '
+                                    'incorrect. Fill the correct data.')
 
-            self.scanned_flight_window = ScannedFlightsWindow(scanned_result, input_data)
+            self.scanned_flight_window = ScannedFlightsWindow(scanned_result,
+                                                              input_data)
             self.scanned_flight_window.show()
             self.hide()
 
 
 class ScannedFlightsWindow(QWidget):
+    """
+    A window that displays the scanned flights results.
+    """
     def __init__(self, scanned_result, input_data):
+        """
+        Initializes the ScannedFlightsWindow with scanned results and input data.
+        """
         super().__init__()
 
         self.init_ui(scanned_result, input_data)
 
     def init_ui(self, scanned_result, input_data):
+        """
+        Sets up the user interface elements to display scanned flight data.
 
-        # Create Menu Window
-        screen_size = QApplication.primaryScreen().size()
-        font_size = 14  # 4
+        Parameters
+        ----------
+        scanned_result : list
+            The list of scanned flights.
+        input_data : dict
+            The input data containing flight details.
+        """
+        font_size = 14  # 4 TODO: Change to 4 for the laptop scale
         self.setFixedSize(1920, 1080)
         self.setWindowTitle('Cheapest flights List')
-        self.setWindowIcon(QtGui.QIcon('flight_scanner_logo.png')) # TODO: Fix why it is not showing the icon
+        self.setWindowIcon(QtGui.QIcon('flight_scanner_logo.png'))
+        # TODO: Fix why it is not showing the icon  <-----
         self.setStyleSheet('''background: #e9f6fc''')
         self.show()
 
         # Create Label for Round Trip
-        self.label_round_trip = QLabel(f"Round trip: {input_data['flight_from']} - {input_data['flight_to']}")
-        self.label_round_trip.setFont(QFont('Brush Script MT', font_size*2))
+        self.label_round_trip = QLabel(f"Round trip: {input_data['flight_from']}"
+                                       f" - {input_data['flight_to']}")
+        self.label_round_trip.setFont(QFont('Brush Script MT', font_size * 2))
         self.label_round_trip.setAlignment(QtCore.Qt.AlignCenter)
         self.label_round_trip.setFrameStyle(QFrame.Panel | QFrame.Raised)
-        self.label_round_trip.setStyleSheet("QFrame { border-radius: 10px; border: 2px solid #29AAE1; }")
+        self.label_round_trip.setStyleSheet("QFrame { border-radius: 10px; "
+                                            "border: 2px solid #29AAE1; }")
 
         # Create layouts
         main_layout = QVBoxLayout()
@@ -189,22 +228,27 @@ class ScannedFlightsWindow(QWidget):
         buttons = []
         for i, flight in enumerate(scanned_result):
             # Create labels with flight data
-            label_price = QLabel(f"{i+1} | Price: {flight.price} |")
+            label_price = QLabel(f"{i + 1} | Price: {flight.price} |")
             label_price.setFont(QFont('Brush Script MT', font_size * 2))
             label_price.setStyleSheet(
-                'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
+                'background-color: #bce4f5; border: 1px solid #29AAE1; '
+                'padding: 5px; border-radius: 5px;')
             layout2.addWidget(label_price, i + 1, 0)
             label_departure = QLabel(
-                f"| Departure: {format_datetime_to_textdate_and_time(flight.departure_flight.departure_time)} |")
+                f"| Departure: {format_datetime_to_textdate_and_time
+                (flight.departure_flight.departure_time)} |")
             label_departure.setFont(QFont('Brush Script MT', font_size * 2))
             label_departure.setStyleSheet(
-                'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
+                'background-color: #bce4f5; border: 1px solid #29AAE1; '
+                'padding: 5px; border-radius: 5px;')
             layout2.addWidget(label_departure, i + 1, 1)
             label_return = QLabel(
-                f"| Return: {format_datetime_to_textdate_and_time(flight.arrival_flight.arrival_time)} |")
+                f"| Return: {format_datetime_to_textdate_and_time
+                (flight.arrival_flight.arrival_time)} |")
             label_return.setFont(QFont('Brush Script MT', font_size * 2))
             label_return.setStyleSheet(
-                'background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
+                'background-color: #bce4f5; border: 1px solid #29AAE1; '
+                'padding: 5px; border-radius: 5px;')
             layout2.addWidget(label_return, i + 1, 2)
 
             # Create buttons with link for flight
@@ -232,7 +276,8 @@ class ScannedFlightsWindow(QWidget):
             )
             layout2.addWidget(button, i + 1, 3)
             buttons.append(button)
-            button.clicked.connect(lambda checked, url=flight.link: open_link(url))
+            button.clicked.connect(lambda checked, url=flight.link:
+                                   open_link(url))
 
         # Add widgets to layout1
         layout1.addWidget(QWidget(), 1, 1)
@@ -247,7 +292,17 @@ class ScannedFlightsWindow(QWidget):
         self.setLayout(main_layout)
 
 
-def info_box(title, text):
+def popup_info_box(title, text):
+    """
+    Displays an information popup box.
+
+    Parameters
+    ----------
+    title : str
+        The title of the popup window.
+    text : str
+        The message text to display in the popup window.
+    """
     info_box = QMessageBox()
     info_box.setIcon(QMessageBox.Information)
     info_box.setWindowTitle(title)

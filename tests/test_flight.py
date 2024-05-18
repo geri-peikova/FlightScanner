@@ -1,7 +1,6 @@
 from datetime import datetime
 from setup import INPUT_DATA, FLIGHTS_INFO, LIST_FLIGHTS_UNSORTED
 
-import pytest
 from Flight import get_departure, get_arrival, get_duration, get_departure_time, get_flight_date, convert_date_format, \
     get_arrival_time, Travel, Flight
 from flight_scanner import get_sorted_list_flights

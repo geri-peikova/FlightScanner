@@ -1,65 +1,126 @@
+import re
 from datetime import datetime, timedelta
-
 from dateutil.relativedelta import relativedelta
 
 
-def generate_dates(start_day, end_day, num_months=1):
-    start_day = get_index_by_weekday_name(start_day)
-    end_day = get_index_by_weekday_name(end_day)
-    dates_list = []
+def get_travel_dates(start_day, end_day, num_months=1):
+    """
+    Generates a list of travel dates within the specified number of months.
+
+    Parameters
+    ----------
+    start_day : str
+        The starting day of the week for travel (e.g., 'Monday').
+    end_day : str
+        The ending day of the week for travel (e.g., 'Friday').
+    num_months : int, optional
+        The number of months within which to generate travel dates (default is 1).
+
+    Returns
+    -------
+    travel_dates_list : list
+        A list of dictionaries, each containing 'Start' and 'End' keys with travel dates.
+    """
+    start_day = get_weekday_index(start_day)
+    end_day = get_weekday_index(end_day)
+    travel_dates_list = []
     today = datetime.now()
 
-    # Find the next Friday
     current_day_of_week = today.weekday()
     days_until_start_day = (start_day - current_day_of_week + 7) % 7
     next_weekday = today + timedelta(days=days_until_start_day)
 
-    # Print all the dates starting from Friday and ending on Monday for the next two months
     while next_weekday + timedelta(days=end_day) <= today + relativedelta(
-            months=+num_months):  # Print for the next two months (8 weeks)
+            months=+num_months):
         if start_day >= end_day:
             week_set = {
                 'End': (next_weekday + timedelta(days=end_day) - timedelta(start_day - 7)).strftime('%a, %b %d')}
         else:
             week_set = {'End': (next_weekday + timedelta(days=end_day)).strftime('%a, %b %d')}
         week_set['Start'] = next_weekday.strftime('%a, %b %d')
-        dates_list.append(week_set)
+        travel_dates_list.append(week_set)
         next_weekday += timedelta(days=7)
-    return dates_list
+    return travel_dates_list
 
 
-def get_index_by_weekday_name(weekday):
-    for i, day in enumerate(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']):
+def get_weekday_index(weekday):
+    """
+    Returns the index of the given weekday.
+
+    Parameters
+    ----------
+    weekday : str
+        The name of the weekday (e.g., 'Monday').
+
+    Returns
+    -------
+    index : int
+        The index of the weekday (0 for Monday, 6 for Sunday).
+    """
+    for index, day in enumerate(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']):
         if day == weekday:
-            return i
-
-
-def get_calendar_dates():
-
-    today = datetime.today()
-    next_year = today + timedelta(days=183)
-
-    weekend_dates = []
-    current_weekend = []
-
-    day_labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-
-    current_date = today
-    while current_date <= next_year:
-        if current_date.weekday() in (4, 5, 6):
-            current_weekend.append(f"{current_date.strftime('%d.%m.%Y')} ({day_labels[current_date.weekday()]})")
-        if current_date.weekday() == 6:  # If the current date is Sunday, it's the end of the weekend
-            if current_weekend:  # Check if there are dates in the current weekend
-                weekend_dates.append(current_weekend)
-                current_weekend = []  # Reset the current weekend
-        current_date += timedelta(days=1)
-
-    for i, weekend in enumerate(weekend_dates, start=1):
-        print(f"Weekend {i}:")
-        for date in weekend:
-            print(date)
-        print()
+            return index
 
 
 def format_datetime_to_textdate_and_time(dt):
-    return dt.strftime("%d %b %Y, %H:%Mh")
+    """
+    Formats a datetime object to a string in the given format.
+
+    Parameters
+    ----------
+    dt : datetime
+        Datetime.
+
+    Returns
+    -------
+    dt : str
+        The formatted date and time string.
+    """
+    dt = dt.strftime("%d %b %Y, %H:%Mh")
+    return dt
+
+
+def convert_date_format(flight_date):   # "Mon, Sep 2"
+    """
+    Converts a flight date string to ensure the day part is two digits.
+
+    Parameters
+    ----------
+    flight_date : str
+        The flight date string (e.g., 'Mon, Sep 2').
+
+    Returns
+    -------
+    flight_date : str
+        The converted flight date string (e.g., 'Mon, Sep 02').
+    """
+    flight_date = flight_date.split(' ')
+    if len(flight_date[-1]) == 1:
+        flight_date[-1] = '0' + flight_date[-1]
+    flight_date = ' '.join(flight_date)
+    return flight_date
+
+
+def get_flight_date(flight_info):
+    """
+    Extracts and returns the flight date from the flight info string.
+
+    Parameters
+    ----------
+    flight_info : str
+        The string containing details about the flight.
+
+    Returns
+    -------
+    current_date : datetime
+        The flight date as a datetime object.
+    """
+    flight_date_string = re.search(r'(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d+', flight_info).group()    # "Mon, Sep 2"
+    flight_date_string = convert_date_format(flight_date_string)
+    flight_date = datetime.strptime(flight_date_string, '%a, %b %d')
+    current_year = datetime.now().year
+    while True:
+        current_date = datetime(current_year, flight_date.month, flight_date.day)
+        if current_date.strftime("%a, %b %d") == flight_date_string:
+            return current_date
+        current_year += 1
