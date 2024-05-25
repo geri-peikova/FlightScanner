@@ -19,7 +19,7 @@ def get_travel_dates(start_day, end_day, num_months=1):
     Returns
     -------
     travel_dates_list : list
-        A list of dictionaries, each containing 'Start' and 'End' keys with travel dates.
+        A list of duplicated dictionaries, each containing 'Start' and 'End' keys with travel dates.
     """
     start_day = get_weekday_index(start_day)
     end_day = get_weekday_index(end_day)

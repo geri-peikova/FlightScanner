@@ -19,15 +19,20 @@ def driver_setup(url):
     -------
     WebDriver
         A configured instance of Selenium WebDriver for Chrome.
-
     """
     user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
 
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_experimental_option("useAutomationExtension", False)
-    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    #chrome_options.add_argument('--headless')  # to not see what is happening in chrome
-    chrome_options.add_argument(f"user-agent={user_agent}")
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--proxy-server='direct://'")
+    chrome_options.add_argument("--proxy-bypass-list=*")
+    chrome_options.add_argument("--start-maximized")
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--ignore-certificate-errors')
     chrome_options.add_experimental_option("detach", True)
     driver = webdriver.Chrome(options=chrome_options)
 
@@ -38,22 +43,27 @@ def driver_setup(url):
 
 def find_my_element_by_xpath(driver, xpath, retries=2):
     """
-   Finds an element on a web page by its XPath.
+    Finds an element on a web page by its XPath.
 
-   Parameters
-   ----------
-   driver : WebDriver
-       The Selenium WebDriver instance to use for finding the element.
-   xpath : str
-       The XPath of the element to find.
-   retries : int
-        The number of retries to attempt if the element is not found. Defaults to 1.
+    Parameters
+    ----------
+    driver : WebDriver
+        The Selenium WebDriver instance to use for finding the element.
+    xpath : str
+        The XPath of the element to find.
+    retries : int, optional
+        The number of retries to attempt if the element is not found. Defaults to 2.
 
-   Returns
-   -------
-   WebElement
-       The found web element.
-   """
+    Returns
+    -------
+    WebElement
+        The found web element.
+
+    Raises
+    ------
+    Exception
+        If the element is not found after the specified number of retries.
+    """
     try:
         my_element = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, xpath)))
     except Exception:
@@ -67,7 +77,7 @@ def find_my_element_by_xpath(driver, xpath, retries=2):
 
 def sort_flights_by_price_driver(driver):
     """
-    Sorts the flights by price.
+    Sorts the flights by price on the web page using the WebDriver.
 
     Parameters
     ----------
@@ -75,10 +85,18 @@ def sort_flights_by_price_driver(driver):
         The Selenium WebDriver instance to use for interacting with the elements.
     """
     try:
-        sort_button = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[1]/div/button')))
+        sort_button = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[1]/div/button')
+            )
+        )
         sort_by_price_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[2]/div/ul/li[2]'
     except Exception:
-        sort_button = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div/div[2]/div[1]/div/div/div/div[1]/div/button')))
+        sort_button = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div/div[2]/div[1]/div/div/div/div[1]/div/button')
+            )
+        )
         sort_by_price_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div/div/div/div[2]/div/ul/li[2]'
     finally:
         sort_button.click()
@@ -103,19 +121,24 @@ def open_link(url):
 
 def get_xpath_for_li(set_num, driver):
     """
-    Retrieves a list of XPath expressions for flight elements on a web page.
+    Retrieves the XPath for a specific flight element on a web page.
 
     Parameters
     ----------
+    set_num : int
+        The set number to determine the XPath.
     driver : WebDriver
         The Selenium WebDriver instance to use for finding the elements.
 
     Returns
     -------
-    list_flights: list
-        A list of XPath expressions for the flight elements.
-    exit_code: int
-        Returns 1 if no flights are found.
+    str
+        The XPath expression for the flight element.
+
+    Raises
+    ------
+    Exception
+        If no flights are found.
     """
     exit_code = 1
     list_flights = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[4]/ul')
@@ -124,7 +147,7 @@ def get_xpath_for_li(set_num, driver):
         driver.quit()
         return exit_code
     list_index = set_num % 2 + 1
-    xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[4]/ul/li[' + str(list_index) + ']'
+    xpath = f'/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[4]/ul/li[{list_index}]'
     return xpath
 
 
@@ -139,7 +162,7 @@ def get_sorted_list_flights(list_flights):
 
     Returns
     -------
-    sorted_flights : list
+    list
         A sorted list of the top 8 flights by price.
     """
     sorted_flights = sorted(list_flights, key=lambda flight: flight.price)[:8]

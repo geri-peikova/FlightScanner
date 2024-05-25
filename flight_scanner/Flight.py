@@ -7,24 +7,24 @@ from date_utils import get_flight_date
 class Flight:
     def __init__(self, flight_info, input_data, direction):
         """
-       Initializes a Flight object with information about a specific flight.
+        Initializes a Flight object with information about a specific flight.
 
-       Parameters
-       ----------
-       flight_info : str
-           The string containing details about the flight.
-       input_data : dict
-           A dictionary containing additional flight search parameters.
-       direction : str
-           The direction of the flight, either 'straight' or 'back'.
-       """
+        Parameters
+        ----------
+        flight_info : str
+            The string containing details about the flight.
+        input_data : dict
+            A dictionary containing additional flight search parameters.
+        direction : str
+            The direction of the flight, either 'straight' or 'back'.
+        """
         self.info = flight_info
         self.flight_from = get_departure(flight_info, input_data, direction)  # Sofia, SOF
         self.flight_to = get_arrival(flight_info, input_data, direction)      # Rome, CIA
-        self.company = 'company'      # TODO: Ryanair
-        self.departure_time = get_departure_time(flight_info)    # 'Mon, Sep 2, 1:25PM
-        self.arrival_time = get_arrival_time(flight_info)    # 'Mon, Sep 2, 2:10PM
-        self.duration = get_duration(flight_info)    # 1 hr 45 min
+        self.company = 'company'  # TODO: Update with actual company name
+        self.departure_time = get_departure_time(flight_info)  # 'Mon, Sep 2, 1:25PM'
+        self.arrival_time = get_arrival_time(flight_info)  # 'Mon, Sep 2, 2:10PM'
+        self.duration = get_duration(flight_info)  # '1 hr 45 min'
 
 
 class Travel:
@@ -39,10 +39,10 @@ class Travel:
         input_data : dict
             A dictionary containing additional flight search parameters.
         """
-        self.departure_flight = Flight(flight_info['departure_flight'], input_data, 'straight')     # 'departure_flight': 'Mon, Sep 2\n1:25\u202fPM\n – \n2:10\u202fPM\nRyanairOperated by Ryanair Sun\n1 hr 45 min\nSOF–CIA\nNonstop\n91 kg CO2e\nAvg emissions'
-        self.arrival_flight = Flight(flight_info['arrival_flight'], input_data, 'back')   # 'arrival_flight': 'Tue, Sep 3\n8:35\u202fPM\n – \n11:20\u202fPM\nRyanairOperated by Ryanair Sun\n1 hr 45 min\nCIA–SOF\nNonstop\n91 kg CO2e\nAvg emissions'
-        self.price = flight_info['price']  # BGN 176
-        self.link = flight_info['link']  # 'link': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhpKEgoy'
+        self.departure_flight = Flight(flight_info['departure_flight'], input_data, 'straight')  # Departure flight details
+        self.arrival_flight = Flight(flight_info['arrival_flight'], input_data, 'back')  # Arrival flight details
+        self.price = flight_info['price']  # Price of the flight
+        self.link = flight_info['link']  # Link to the flight booking page
 
 
 def get_departure(flight_info, input_data, direction):
