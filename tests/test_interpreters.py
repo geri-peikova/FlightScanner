@@ -1,10 +1,15 @@
+"""Tests for interpreters"""
+
+# pylint: disable=line-too-long
+# pylint: disable=redefined-outer-name
+
 from unittest.mock import Mock, patch, MagicMock
 
 import pytest
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 
-from interpreters import driver_setup, find_my_element_by_xpath, sort_flights_by_price_driver, open_link, \
+from flight_scanner.interpreters import driver_setup_headless, find_my_element_by_xpath, open_link, \
     get_xpath_for_li, get_sorted_list_flights
 from tests.setup import LIST_FLIGHTS_UNSORTED
 
@@ -13,17 +18,6 @@ from tests.setup import LIST_FLIGHTS_UNSORTED
 def mock_webdriver(mocker):
     """
     Fixture to mock the WebDriver for testing.
-
-    Parameters
-    ----------
-    mocker : pytest_mock.plugin.MockerFixture
-        Pytest fixture to create mock objects.
-
-    Returns
-    -------
-    MagicMock
-        A mock object representing the WebDriver.
-
     """
     mock_driver = mocker.MagicMock(spec=webdriver.Chrome)
     mocker.patch('selenium.webdriver.Chrome', return_value=mock_driver)
@@ -34,16 +28,6 @@ def mock_webdriver(mocker):
 def mock_webelement(mocker):
     """
     Fixture to mock the WebElement for testing.
-
-    Parameters
-    ----------
-    mocker : pytest_mock.plugin.MockerFixture
-        Pytest fixture to create mock objects.
-
-    Returns
-    -------
-    MagicMock
-        A mock object representing the WebElement.
     """
     return mocker.MagicMock(spec=WebElement)
 
@@ -52,16 +36,6 @@ def mock_webelement(mocker):
 def mock_webdriver_wait(mocker):
     """
     Fixture to mock WebDriverWait for testing.
-
-    Parameters
-    ----------
-    mocker : pytest_mock.plugin.MockerFixture
-        Pytest fixture to create mock objects.
-
-    Returns
-    -------
-    MagicMock
-        A mock object representing WebDriverWait.
     """
     return mocker.patch('selenium.webdriver.support.ui.WebDriverWait', autospec=True)
 
@@ -69,56 +43,33 @@ def mock_webdriver_wait(mocker):
 def test_driver_setup_returns_webdriver_instance(mock_webdriver):
     """
     Test case to verify that driver_setup returns a WebDriver instance.
-
-    Parameters
-    ----------
-    mock_webdriver : MagicMock
-        A mock object representing the WebDriver.
-
     """
     url = "https://www.google.com"
-    driver = driver_setup(url)
+    driver = driver_setup_headless(url)
     assert driver is mock_webdriver
 
 
 def test_driver_setup_opens_correct_url(mock_webdriver):
     """
     Test case to verify that driver_setup opens the correct URL.
-
-    Parameters
-    ----------
-    mock_webdriver : MagicMock
-        A mock object representing the WebDriver.
-
     """
     url = "https://www.google.com"
-    driver = driver_setup(url)
+    driver = driver_setup_headless(url)
     driver.get.assert_called_once_with(url)
 
 
 def test_driver_setup_maximizes_window(mock_webdriver):
     """
     Test case to verify that driver_setup maximizes the window.
-
-    Parameters
-    ----------
-    mock_webdriver : MagicMock
-        A mock object representing the WebDriver.
-
     """
     url = "https://www.google.com"
-    driver = driver_setup(url)
+    driver = driver_setup_headless(url)
     driver.maximize_window.assert_called_once()
 
 
 def test_find_my_element_by_xpath_retry_success(mock_webdriver):
     """
     Test case to verify that find_my_element_by_xpath retries finding the element and succeeds after a page refresh.
-
-    Parameters
-    ----------
-    mock_webdriver : MagicMock
-        A mock object representing the WebDriver.
     """
     xpath = "//div[@id='test']"
     mock_element = Mock()
@@ -134,11 +85,6 @@ def test_find_my_element_by_xpath_retry_success(mock_webdriver):
 def test_find_my_element_by_xpath_fail(mock_webdriver):
     """
     Test case to verify that find_my_element_by_xpath raises an exception if the element cannot be found after retries.
-
-    Parameters
-    ----------
-    mock_webdriver : MagicMock
-        A mock object representing the WebDriver.
     """
     xpath = "//div[@id='test']"
 
@@ -150,19 +96,16 @@ def test_find_my_element_by_xpath_fail(mock_webdriver):
             mock_refresh.assert_called_once()
 
 
-@patch('interpreters.driver_setup')
-def test_open_link(mock_driver_setup):
+def test_open_link(mock_webdriver):
     """
     Test the open_link function.
     """
-    url = 'https://google.com'
-    mock_driver_setup.return_value = MagicMock()
-
-    open_link(url)
-    mock_driver_setup.assert_called_once_with(url)
+    url = "https://www.google.com"
+    driver = open_link(url)
+    assert driver is mock_webdriver
 
 
-@patch('interpreters.find_my_element_by_xpath')
+@patch('flight_scanner.interpreters.find_my_element_by_xpath')
 def test_get_xpath_for_li_found(mock_find_my_element_by_xpath):
     """
     Test get_xpath_for_li when flights are found.
@@ -182,7 +125,7 @@ def test_get_xpath_for_li_found(mock_find_my_element_by_xpath):
     )
 
 
-@patch('interpreters.find_my_element_by_xpath')
+@patch('flight_scanner.interpreters.find_my_element_by_xpath')
 def test_get_xpath_for_li_not_found(mock_find_my_element_by_xpath):
     """
     Test get_xpath_for_li when no flights are found.
@@ -203,6 +146,9 @@ def test_get_xpath_for_li_not_found(mock_find_my_element_by_xpath):
 
 
 def test_get_sorted_list_flights():
+    """
+    Test get_sorted_list_flights function.
+    """
     result = get_sorted_list_flights(LIST_FLIGHTS_UNSORTED)
     for i in range(1, len(result)):
         assert result[i].price >= result[i-1].price

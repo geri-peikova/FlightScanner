@@ -1,12 +1,23 @@
+"""Module providing with pyqt5 window UI"""
+
+# pylint: disable=line-too-long
+# pylint: disable=no-name-in-module
+# pylint: disable=c-extension-no-member
+# pylint: disable=attribute-defined-outside-init
+# pylint: disable=too-few-public-methods
+# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-statements
+
+
 import threading
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QPushButton,
                              QMessageBox, QGridLayout, QFrame)
 from PyQt5 import QtCore, QtGui
 
-from date_utils import format_datetime_to_textdate_and_time, get_travel_dates
-from interpreters import open_link, get_sorted_list_flights
-from threads import LoadingThread, ScanningThread
+from flight_scanner.date_utils import format_datetime_to_textdate_and_time, get_travel_dates
+from flight_scanner.interpreters import open_link, get_sorted_list_flights
+from flight_scanner.threads import LoadingThread, ScanningThread
 
 
 class MyMenuWindow(QWidget):
@@ -141,7 +152,7 @@ class MyMenuWindow(QWidget):
             self.loading_thread.start()
 
             threads = []
-            for index, travel_dates in enumerate(input_data['dates_list']):
+            for index in range(len(input_data['dates_list'])):
                 lock = threading.Lock()
                 scanning_thread = ScanningThread(self, index, input_data, list_flights, lock)
                 threads.append(scanning_thread)

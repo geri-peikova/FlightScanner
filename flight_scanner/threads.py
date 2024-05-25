@@ -1,8 +1,14 @@
+"""Module providing threads with loading animation and web scrapping for flights"""
+
+# pylint: disable=line-too-long
+# pylint: disable=too-many-arguments
+# pylint: disable=attribute-defined-outside-init
+
 import threading
 import time
 
-from flight_scanner import adding_set_of_flights
-from interpreters import driver_setup, find_my_element_by_xpath
+from flight_scanner.flight_scanner import adding_set_of_flights
+from flight_scanner.interpreters import driver_setup_headless, find_my_element_by_xpath
 
 
 class LoadingThread(threading.Thread):
@@ -84,7 +90,7 @@ class ScanningThread(threading.Thread):
         """
         Runs the thread, scanning for flights and adding them to the shared list.
         """
-        driver = driver_setup('https://www.google.com/travel/flights')
+        driver = driver_setup_headless('https://www.google.com/travel/flights')
         try:
             button_accept_all = find_my_element_by_xpath(
                 driver,

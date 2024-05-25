@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 
-from windows import MyMenuWindow
+from flight_scanner.windows import MyMenuWindow
 
 if __name__ == '__main__':
 

@@ -1,3 +1,9 @@
+"""Module providing instructions for webdriver to follow"""
+
+# pylint: disable=line-too-long
+# pylint: disable=broad-exception-caught
+# pylint: disable=broad-exception-raised
+# pylint: disable=raise-missing-from
 import time
 
 from selenium import webdriver
@@ -6,7 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 
-def driver_setup(url):
+def driver_setup_headless(url):
     """
     Sets up and initializes a Selenium WebDriver for Chrome with specific options.
 
@@ -20,8 +26,6 @@ def driver_setup(url):
     WebDriver
         A configured instance of Selenium WebDriver for Chrome.
     """
-    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
-
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-extensions")
@@ -70,8 +74,7 @@ def find_my_element_by_xpath(driver, xpath, retries=2):
         if retries > 0:
             driver.refresh()
             return find_my_element_by_xpath(driver, xpath, retries=retries - 1)
-        else:
-            raise Exception("Element not found after retries")
+        raise Exception("Element not found after retries")
     return my_element
 
 
@@ -115,8 +118,23 @@ def open_link(url):
     url : str
         The URL to open.
     """
-    driver_setup(url)
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--proxy-server='direct://'")
+    chrome_options.add_argument("--proxy-bypass-list=*")
+    chrome_options.add_argument("--start-maximized")
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--ignore-certificate-errors')
+    chrome_options.add_experimental_option("detach", True)
+    driver = webdriver.Chrome(options=chrome_options)
+
     print(f"Opening link: {url}")
+    driver.maximize_window()
+    driver.get(url)
+    return driver
 
 
 def get_xpath_for_li(set_num, driver):

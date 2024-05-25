@@ -1,3 +1,7 @@
+"""Module providing instructions for webdriver to follow"""
+
+# pylint: disable=line-too-long
+# pylint: disable=bare-except
 import time
 
 from selenium.common import NoSuchElementException, StaleElementReferenceException, InvalidSelectorException
@@ -6,8 +10,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from Flight import Travel
-from interpreters import find_my_element_by_xpath, sort_flights_by_price_driver, get_xpath_for_li
+from flight_scanner.flight import Travel
+from flight_scanner.interpreters import find_my_element_by_xpath, sort_flights_by_price_driver, get_xpath_for_li
 
 
 def add_flights(flight, list_flights, input_data, driver, lock):

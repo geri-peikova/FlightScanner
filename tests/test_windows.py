@@ -1,7 +1,12 @@
+"""Tests for loading animation and web scrapping for flights"""
+
+# pylint: disable=no-name-in-module
+# pylint: disable=redefined-outer-name
+
 import pytest
 from PyQt5.QtWidgets import QApplication, QComboBox, QLabel, QLineEdit, QPushButton
 
-from windows import MyMenuWindow, ScannedFlightsWindow
+from flight_scanner.windows import MyMenuWindow, ScannedFlightsWindow
 
 
 @pytest.fixture

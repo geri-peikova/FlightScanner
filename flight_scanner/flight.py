@@ -1,10 +1,15 @@
+"""Module providing info about flight and travel"""
+
+# pylint: disable=line-too-long
+# pylint: disable=too-few-public-methods
 import re
 from datetime import datetime
 
-from date_utils import get_flight_date
+from flight_scanner.date_utils import get_flight_date
 
 
 class Flight:
+    """Flight"""
     def __init__(self, flight_info, input_data, direction):
         """
         Initializes a Flight object with information about a specific flight.
@@ -21,13 +26,14 @@ class Flight:
         self.info = flight_info
         self.flight_from = get_departure(flight_info, input_data, direction)  # Sofia, SOF
         self.flight_to = get_arrival(flight_info, input_data, direction)      # Rome, CIA
-        self.company = 'company'  # TODO: Update with actual company name
+        self.company = 'company'
         self.departure_time = get_departure_time(flight_info)  # 'Mon, Sep 2, 1:25PM'
         self.arrival_time = get_arrival_time(flight_info)  # 'Mon, Sep 2, 2:10PM'
         self.duration = get_duration(flight_info)  # '1 hr 45 min'
 
 
 class Travel:
+    """Travel"""
     def __init__(self, flight_info, input_data):
         """
         Initializes a Travel object with information about the departure and arrival flights, price, and link.

@@ -1,4 +1,7 @@
-from Flight import Travel
+"""Setup data for testing"""
+
+# pylint: disable=line-too-long
+from flight_scanner.flight import Travel
 
 INPUT_DATA = {
     'departure_weekday': 'Friday',

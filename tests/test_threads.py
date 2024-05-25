@@ -1,11 +1,15 @@
+"""Tests for loading animation and web scrapping for flights"""
+
+# pylint: disable=no-name-in-module
+# pylint: disable=redefined-outer-name
+
 import threading
 from unittest.mock import MagicMock
-
-import pytest
 import time
+import pytest
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget
 
-from threads import LoadingThread, ScanningThread
+from flight_scanner.threads import LoadingThread, ScanningThread
 
 
 @pytest.fixture
@@ -58,33 +62,53 @@ def test_loading_thread_stop(loading_thread):
 
 @pytest.fixture
 def mock_input_data():
-    return {'departure_weekday': 'Friday',
-                  'arrival_weekday': 'Sunday',
-                  'flight_from': 'Sofia',
-                  'flight_to': 'Rome',
-                  'dates_list': [{'End': 'Tue, Sep 3', 'Start': 'Mon, Sep 2'}]}
+    """
+    Fixture to provide mock input data.
+    """
+    return {
+        'departure_weekday': 'Friday',
+        'arrival_weekday': 'Sunday',
+        'flight_from': 'Sofia',
+        'flight_to': 'Rome',
+        'dates_list': [{'End': 'Tue, Sep 3', 'Start': 'Mon, Sep 2'}]
+    }
 
 
 @pytest.fixture
 def shared_list():
+    """
+    Fixture to provide a shared list.
+    """
     return []
 
 
 @pytest.fixture
 def lock():
+    """
+    Fixture to provide a threading lock.
+    """
     return threading.Lock()
 
 
 @pytest.fixture
 def window():
+    """
+    Fixture to provide a mock window object.
+    """
     return MagicMock()
 
 
 @pytest.fixture
 def scanning_thread(window, mock_input_data, shared_list, lock):
+    """
+    Fixture to create a ScanningThread instance.
+    """
     return ScanningThread(window, 0, mock_input_data, shared_list, lock)
 
 
 def test_stop(scanning_thread):
+    """
+    Test the stop method of ScanningThread.
+    """
     scanning_thread.stop()
     assert scanning_thread.stopped is True

@@ -1,3 +1,7 @@
+"""Module providing functions for extracting travel dates and
+formatting time data"""
+
+# pylint: disable=inconsistent-return-statements
 import re
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -34,9 +38,11 @@ def get_travel_dates(start_day, end_day, num_months=1):
             months=+num_months):
         if start_day >= end_day:
             week_set = {
-                'End': (next_weekday + timedelta(days=end_day) - timedelta(start_day - 7)).strftime('%a, %b %d')}
+                'End': (next_weekday + timedelta(days=end_day) -
+                        timedelta(start_day - 7)).strftime('%a, %b %d')}
         else:
-            week_set = {'End': (next_weekday + timedelta(days=end_day)).strftime('%a, %b %d')}
+            week_set = {'End': (next_weekday + timedelta(days=end_day))
+            .strftime('%a, %b %d')}
         week_set['Start'] = next_weekday.strftime('%a, %b %d')
         travel_dates_list.append(week_set)
         travel_dates_list.append(week_set)
@@ -58,7 +64,8 @@ def get_weekday_index(weekday):
     index : int
         The index of the weekday (0 for Monday, 6 for Sunday).
     """
-    for index, day in enumerate(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']):
+    for index, day in enumerate(['Monday', 'Tuesday', 'Wednesday',
+                                 'Thursday', 'Friday', 'Saturday', 'Sunday']):
         if day == weekday:
             return index
 
@@ -81,7 +88,7 @@ def format_datetime_to_textdate_and_time(dt):
     return dt
 
 
-def convert_date_format(flight_date):   # "Mon, Sep 2"
+def convert_date_format(flight_date):  # "Mon, Sep 2"
     """
     Converts a flight date string to ensure the day part is two digits.
 
@@ -116,7 +123,10 @@ def get_flight_date(flight_info):
     current_date : datetime
         The flight date as a datetime object.
     """
-    flight_date_string = re.search(r'(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d+', flight_info).group()    # "Mon, Sep 2"
+    flight_date_string = re.search(
+        r'(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), '
+        r'(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d+',
+        flight_info).group()  # "Mon, Sep 2"
     flight_date_string = convert_date_format(flight_date_string)
     flight_date = datetime.strptime(flight_date_string, '%a, %b %d')
     current_year = datetime.now().year
