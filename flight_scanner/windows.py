@@ -1,3 +1,5 @@
+import threading
+
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QVBoxLayout, QPushButton, \
     QMessageBox, QGridLayout, QFrame
@@ -5,9 +7,8 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 
 from date_utils import format_datetime_to_textdate_and_time, get_travel_dates
-from flight_scanner import scanning
-from interpreters import open_link
-from threads import LoadingThread
+from interpreters import open_link, get_sorted_list_flights
+from threads import LoadingThread, ScanningThread
 
 
 class MyMenuWindow(QWidget):
@@ -144,6 +145,7 @@ class MyMenuWindow(QWidget):
         """
         Handles the click event for the 'Look for flights' button.
         """
+        list_flights = []
         input_data = {'departure_weekday': self.week_days_combobox1
         .currentText(),
                       'arrival_weekday': self.week_days_combobox2.currentText()}
@@ -164,16 +166,23 @@ class MyMenuWindow(QWidget):
             print(input_data['dates_list'])
             self.loading_thread = LoadingThread(self, self.label_loading)
             self.loading_thread.start()
-            scanned_result = scanning(input_data)  # TODO: Remove the hashtag
-            '''scanned_result = get_sorted_list_flights(
-                LIST_FLIGHTS_UNSORTED)  # TODO: this is testing line and 
-                you should remove it'''
-            self.loading_thread.stop()
-            if scanned_result == 1:
+            threads = []
+            for index, travel_dates in enumerate(input_data['dates_list']):
+                lock = threading.Lock()
+                scanning_thread = ScanningThread(self, index, input_data, list_flights, lock)
+                threads.append(scanning_thread)
+                scanning_thread.start()
+
+            for thread in threads:
+                thread.join()
+
+            if len(list_flights) < 1:
                 popup_info_box('Warning', 'The submitted information is '
                                     'incorrect. Fill the correct data.')
 
-            self.scanned_flight_window = ScannedFlightsWindow(scanned_result,
+            list_flights = get_sorted_list_flights(list_flights)
+            self.loading_thread.stop()
+            self.scanned_flight_window = ScannedFlightsWindow(list_flights,
                                                               input_data)
             self.scanned_flight_window.show()
             self.hide()

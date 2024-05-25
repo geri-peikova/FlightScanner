@@ -39,6 +39,7 @@ def get_travel_dates(start_day, end_day, num_months=1):
             week_set = {'End': (next_weekday + timedelta(days=end_day)).strftime('%a, %b %d')}
         week_set['Start'] = next_weekday.strftime('%a, %b %d')
         travel_dates_list.append(week_set)
+        travel_dates_list.append(week_set)
         next_weekday += timedelta(days=7)
     return travel_dates_list
 

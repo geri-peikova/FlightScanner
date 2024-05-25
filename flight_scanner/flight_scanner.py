@@ -7,39 +7,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from Flight import Travel
-from interpreters import driver_setup, find_my_element_by_xpath, sort_flights_by_price, get_list_flights_xpaths, \
-    get_sorted_list_flights
+from interpreters import find_my_element_by_xpath, sort_flights_by_price_driver, get_xpath_for_li
 
 
-def scanning(input_data):
-    """
-   Scans for flights based on the input data and returns a sorted list of flights.
-
-   Parameters
-   ----------
-   input_data : dict
-       A dictionary containing dates and other flight search parameters.
-
-   Returns
-   -------
-   list
-       A sorted list of flights.
-   """
-    list_flights = []
-    for set_num in range(0, len(input_data['dates_list'])):
-        driver = driver_setup('https://www.google.com/travel/flights')
-        try:
-            button_accept_all = find_my_element_by_xpath(driver, '/html/body/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/div[1]/form[2]/div/div/button')
-            button_accept_all.click()
-            time.sleep(3)
-        finally:
-            adding_set_of_flights(input_data, set_num, list_flights, driver)
-            driver.quit()
-    sorted_list_flights = get_sorted_list_flights(list_flights)
-    return sorted_list_flights
-
-
-def add_flights(flight, list_flights, input_data, driver):
+def add_flights(flight, list_flights, input_data, driver, lock):
     """
     Adds flight information to the list of flights.
 
@@ -77,12 +48,12 @@ def add_flights(flight, list_flights, input_data, driver):
         flight_info = {'price': price.text, 'departure_flight': departure_flight.text,
                        'arrival_flight': arrival_flight.text,
                        'link': driver.current_url}
-        list_flights.append(Travel(flight_info, input_data))
-       # list_flights.append(  {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text, 'link': driver.current_url})
-        time.sleep(3)
-        print('Flight: ',
-              {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text,
-               'link': driver.current_url})
+        with lock:
+            list_flights.append(Travel(flight_info, input_data))
+            time.sleep(3)
+            print('Flight: ',
+                  {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text,
+                   'link': driver.current_url})
 
     except NoSuchElementException or StaleElementReferenceException:
         driver.refresh()
@@ -93,17 +64,9 @@ def add_flights(flight, list_flights, input_data, driver):
 
         flight_info = {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text,
              'link': driver.current_url}
-        list_flights.append(Travel(flight_info, input_data))
-        list_flights.append(
-            {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text,
-             'link': driver.current_url})
-        print('Flight: ', {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text, 'link': driver.current_url})
-
-    finally:
-        time.sleep(3)
-        driver.back()
-        find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/ul')
-        driver.back()
+        with lock:
+            list_flights.append(Travel(flight_info, input_data))
+            print('Flight: ', {'price': price.text, 'departure_flight': departure_flight.text, 'arrival_flight': arrival_flight.text, 'link': driver.current_url})
 
 
 def search_flight(input_data, set_num, driver):
@@ -165,7 +128,7 @@ def search_flight(input_data, set_num, driver):
     return exit_code
 
 
-def adding_set_of_flights(input_data, set_num, list_flights, driver):
+def adding_set_of_flights(input_data, set_num, list_flights, driver, lock):
     """
    Adds a set of flights to the list of flights.
 
@@ -190,9 +153,8 @@ def adding_set_of_flights(input_data, set_num, list_flights, driver):
         time.sleep(3)
     except:
         print('Popup have not shown!')
-    sort_flights_by_price(driver)
+    sort_flights_by_price_driver(driver)
     time.sleep(3)
-    list_flights_xpaths = get_list_flights_xpaths(driver)
-    for flight_xpath in list_flights_xpaths:
-        add_flights(find_my_element_by_xpath(driver, flight_xpath), list_flights, input_data, driver)
-        time.sleep(3)
+    flight_xpath = get_xpath_for_li(set_num, driver)
+    add_flights(find_my_element_by_xpath(driver, flight_xpath), list_flights, input_data, driver, lock)
+    time.sleep(3)

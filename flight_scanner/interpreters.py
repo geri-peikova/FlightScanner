@@ -36,7 +36,7 @@ def driver_setup(url):
     return driver
 
 
-def find_my_element_by_xpath(driver, xpath):
+def find_my_element_by_xpath(driver, xpath, retries=2):
     """
    Finds an element on a web page by its XPath.
 
@@ -46,6 +46,8 @@ def find_my_element_by_xpath(driver, xpath):
        The Selenium WebDriver instance to use for finding the element.
    xpath : str
        The XPath of the element to find.
+   retries : int
+        The number of retries to attempt if the element is not found. Defaults to 1.
 
    Returns
    -------
@@ -54,13 +56,52 @@ def find_my_element_by_xpath(driver, xpath):
    """
     try:
         my_element = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, xpath)))
-    except:
-        driver.refresh()
-        find_my_element_by_xpath(driver, xpath)
+    except Exception:
+        if retries > 0:
+            driver.refresh()
+            return find_my_element_by_xpath(driver, xpath, retries=retries - 1)
+        else:
+            raise Exception("Element not found after retries")
     return my_element
 
 
-def get_list_flights_xpaths(driver):
+def sort_flights_by_price_driver(driver):
+    """
+    Sorts the flights by price.
+
+    Parameters
+    ----------
+    driver : WebDriver
+        The Selenium WebDriver instance to use for interacting with the elements.
+    """
+    try:
+        sort_button = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[1]/div/button')))
+        sort_by_price_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[2]/div/ul/li[2]'
+    except Exception:
+        sort_button = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div/div[2]/div[1]/div/div/div/div[1]/div/button')))
+        sort_by_price_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div/div/div/div[2]/div/ul/li[2]'
+    finally:
+        sort_button.click()
+        time.sleep(2)
+        sort_by_price_button = find_my_element_by_xpath(driver, sort_by_price_xpath)
+        sort_by_price_button.click()
+        time.sleep(2)
+
+
+def open_link(url):
+    """
+    Opens a given URL using the Selenium WebDriver setup.
+
+    Parameters
+    ----------
+    url : str
+        The URL to open.
+    """
+    driver_setup(url)
+    print(f"Opening link: {url}")
+
+
+def get_xpath_for_li(set_num, driver):
     """
     Retrieves a list of XPath expressions for flight elements on a web page.
 
@@ -79,46 +120,12 @@ def get_list_flights_xpaths(driver):
     exit_code = 1
     list_flights = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[4]/ul')
     count_flights = len(list_flights.find_elements(By.TAG_NAME, 'li'))
-    list_flights = []
     if count_flights == 0:
         driver.quit()
         return exit_code
-    for i in range(1, count_flights):
-        list_flights.append('/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[4]/ul/li[' + str(i) + ']')
-        print(list_flights[i-1])
-        if i == 2:  # get 2 flights per date
-            break
-    return list_flights
-
-
-def sort_flights_by_price(driver):
-    """
-    Sorts the flights by price.
-
-    Parameters
-    ----------
-    driver : WebDriver
-        The Selenium WebDriver instance to use for interacting with the elements.
-    """
-    sort_button = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[1]/div/button')))
-    sort_button.click()
-    time.sleep(2)
-    sort_by_price_button = find_my_element_by_xpath(driver, '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/div/div/div/div[2]/div/ul/li[2]')
-    sort_by_price_button.click()
-    time.sleep(2)
-
-
-def open_link(url):
-    """
-    Opens a given URL using the Selenium WebDriver setup.
-
-    Parameters
-    ----------
-    url : str
-        The URL to open.
-    """
-    driver_setup(url)
-    print(f"Opening link: {url}")
+    list_index = set_num % 2 + 1
+    xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[4]/ul/li[' + str(list_index) + ']'
+    return xpath
 
 
 def get_sorted_list_flights(list_flights):
