@@ -183,5 +183,5 @@ def get_sorted_list_flights(list_flights):
     list
         A sorted list of the top 8 flights by price.
     """
-    sorted_flights = sorted(list_flights, key=lambda flight: flight.price)[:8]
+    sorted_flights = sorted(list_flights, key=lambda flight: int(flight.price.split()[1]))[:8]
     return sorted_flights
