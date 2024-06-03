@@ -151,4 +151,4 @@ def test_get_sorted_list_flights():
     """
     result = get_sorted_list_flights(LIST_FLIGHTS_UNSORTED)
     for i in range(1, len(result)):
-        assert result[i].price >= result[i-1].price
+        assert int(result[i].price.split()[1]) >= int(result[i-1].price.split()[1])
