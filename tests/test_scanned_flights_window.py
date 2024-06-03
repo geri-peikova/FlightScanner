@@ -10,7 +10,7 @@ from flight_scanner.windows import ScannedFlightsWindow
 from tests.setup import LIST_FLIGHTS_UNSORTED, INPUT_DATA
 
 
-def scanned_flights_window():
+def test_scanned_flights_window():
     """
     Test Scanned Flight Window with fake data
     """
