@@ -36,7 +36,7 @@ class MyMenuWindow(QWidget):
         """
         Sets up the user interface elements of the window.
         """
-        font_size = 30  # 14 TODO: Change to 14 for the laptop scale
+        font_size = 14  # 30-ultralarge, 14-normal
         self.setFixedSize(1920, 1080)
         self.setWindowTitle('Flight Scanner')
         self.setWindowIcon(QtGui.QIcon('flight_scanner_logo.png'))
@@ -195,14 +195,14 @@ class ScannedFlightsWindow(QWidget):
         input_data : dict
             The input data containing flight details.
         """
-        font_size = 14  # 4 TODO: Change to 4 for the laptop scale
+        font_size = 5  # 14-ultralarge 5-normal
         self.setFixedSize(1920, 1080)
         self.setWindowTitle('Cheapest flights List')
         self.setWindowIcon(QtGui.QIcon('flight_scanner_logo.png'))
         self.setStyleSheet('background: #e9f6fc')
 
         self.label_round_trip = QLabel(f"Round trip: {input_data['flight_from']} - {input_data['flight_to']}")
-        self.label_round_trip.setFont(QFont('Brush Script MT', font_size * 2))
+        self.label_round_trip.setFont(QFont('Arial', font_size * 2))
         self.label_round_trip.setAlignment(QtCore.Qt.AlignCenter)
         self.label_round_trip.setFrameStyle(QFrame.Panel | QFrame.Raised)
         self.label_round_trip.setStyleSheet("QFrame { border-radius: 10px; border: 2px solid #29AAE1; }")
@@ -214,22 +214,22 @@ class ScannedFlightsWindow(QWidget):
         buttons = []
         for i, flight in enumerate(scanned_result):
             label_price = QLabel(f"{i + 1} | Price: {flight.price} |")
-            label_price.setFont(QFont('Brush Script MT', font_size * 2))
+            label_price.setFont(QFont('Arial', font_size * 2))
             label_price.setStyleSheet('background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
             layout2.addWidget(label_price, i + 1, 0)
 
             label_departure = QLabel(f"| Departure: {format_datetime_to_textdate_and_time(flight.departure_flight.departure_time)} |")
-            label_departure.setFont(QFont('Brush Script MT', font_size * 2))
+            label_departure.setFont(QFont('Arial', font_size * 2))
             label_departure.setStyleSheet('background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
             layout2.addWidget(label_departure, i + 1, 1)
 
             label_return = QLabel(f"| Return: {format_datetime_to_textdate_and_time(flight.arrival_flight.arrival_time)} |")
-            label_return.setFont(QFont('Brush Script MT', font_size * 2))
+            label_return.setFont(QFont('Arial', font_size * 2))
             label_return.setStyleSheet('background-color: #bce4f5; border: 1px solid #29AAE1; padding: 5px; border-radius: 5px;')
             layout2.addWidget(label_return, i + 1, 2)
 
             button = QPushButton("More Data")
-            button.setFont(QFont('Brush Script MT', font_size * 2))
+            button.setFont(QFont('Arial', font_size * 2))
             button.setStyleSheet(
                 '''
                 QPushButton {

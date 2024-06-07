@@ -11,7 +11,7 @@ import pytest
 from selenium.common import TimeoutException
 from selenium.webdriver.support.wait import WebDriverWait
 
-from flight_scanner.flight_scanner import adding_set_of_flights, search_flight
+from flight_scanner.flight_scanner import flight_scanning, search_flight
 
 
 @pytest.fixture
@@ -150,7 +150,7 @@ def test_adding_set_of_flights_success(mock_find_my_element_by_xpath, mock_searc
     mock_get_xpath_for_li.return_value = '//li[1]'
     mock_find_my_element_by_xpath.return_value = MagicMock()
 
-    adding_set_of_flights(mock_input_data, set_num, shared_list, mock_driver, lock)
+    flight_scanning(mock_input_data, set_num, shared_list, mock_driver, lock)
 
     mock_search_flight.assert_called_once_with(mock_input_data, set_num, mock_driver)
     mock_sort_flights_by_price_driver.assert_called_once_with(mock_driver)
@@ -177,7 +177,7 @@ def test_adding_set_of_flights_no_popup(mock_find_my_element_by_xpath, mock_sear
     mock_find_my_element_by_xpath.return_value = MagicMock()
     mock_driver.find_element.side_effect = Exception('Popup not found')
 
-    adding_set_of_flights(mock_input_data, set_num, shared_list, mock_driver, lock)
+    flight_scanning(mock_input_data, set_num, shared_list, mock_driver, lock)
 
     mock_search_flight.assert_called_once_with(mock_input_data, set_num, mock_driver)
     mock_sort_flights_by_price_driver.assert_called_once_with(mock_driver)

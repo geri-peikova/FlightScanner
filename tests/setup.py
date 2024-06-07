@@ -21,7 +21,7 @@ FLIGHTS_INFO = [
         'link': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhpKEgoy'
     },
     {
-        'price': 'BGN 409',
+        'price': 'BGN 89',
         'departure_flight': 'Mon, Sep 2\n9:50\u202fPM\n – \n10:50\u202fPM\nWizz Air\n45 min\nSOF–FCO\n1h 55 min\n84 kg CO2e\n-8% emissions',
         'arrival_flight': 'Tue, Sep 3\n10:50\u202fAM\n – \n6:45\u202fPM\nLufthansa\n6 hr 55 min\nFCO–SOF\n1 stop\n3 hr 30 min MUC\n188 kg CO2e\n+107% emissions',
         'link': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhpKEgoyMDI0LT'

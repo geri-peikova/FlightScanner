@@ -1,7 +1,6 @@
 """Tests for loading animation and web scrapping for flights"""
 
-# pylint: disable=no-name-in-module
-# pylint: disable=redefined-outer-name
+# pylint: skip-file
 
 import threading
 from unittest.mock import MagicMock

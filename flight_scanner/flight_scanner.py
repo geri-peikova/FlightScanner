@@ -142,7 +142,7 @@ def search_flight(input_data, set_num, driver):
     return 0
 
 
-def adding_set_of_flights(input_data, set_num, list_flights, driver, lock):
+def flight_scanning(input_data, set_num, list_flights, driver, lock):
     """
     Adds a set of flights to the list of flights.
 

@@ -7,7 +7,7 @@
 import threading
 import time
 
-from flight_scanner.flight_scanner import adding_set_of_flights
+from flight_scanner.flight_scanner import flight_scanning
 from flight_scanner.interpreters import driver_setup_headless, find_my_element_by_xpath
 
 
@@ -99,7 +99,7 @@ class ScanningThread(threading.Thread):
             button_accept_all.click()
             time.sleep(3)
         finally:
-            adding_set_of_flights(self.input_data, self.index, self.list_flights, driver, self.lock)
+            flight_scanning(self.input_data, self.index, self.list_flights, driver, self.lock)
 
         driver.quit()
         self.stop()

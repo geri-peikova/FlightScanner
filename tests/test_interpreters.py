@@ -2,6 +2,9 @@
 
 # pylint: disable=line-too-long
 # pylint: disable=redefined-outer-name
+# pylint: disable=no-member
+# pylint: disable=unused-argument
+
 
 from unittest.mock import Mock, patch, MagicMock
 
